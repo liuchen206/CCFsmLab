@@ -29,10 +29,9 @@ cc.Class({
         vVelocity:cc.Vec2,
         vHeading:cc.Vec2,
         vSide:cc.Vec2,
-        MaxSpeed:cc.Vec2,
-        MaxForce:cc.Vec2,
+        MaxSpeed:200,
+        MaxForce:200,
         Mass:1,
-        MaxTurnRate:1,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -69,19 +68,21 @@ cc.Class({
     },
 
     update (dt) {
+        steeringForce = cc.Vec2.ZERO;
         // 计算行为合力
         var steeringForce = this.SteeringBehaviorsJS.Calculate();
-        steeringForce = steeringForce.clampf(this.MaxForce.mul(-1), this.MaxForce);
+        steeringForce = TruncateByVec2Mag(this.MaxForce,steeringForce);
+        // cc.log('steeringForce=',steeringForce.toString()); 
         var acc = steeringForce.div(this.Mass);
         this.vVelocity.addSelf(acc.mul(dt));
-        this.vVelocity = this.vVelocity.clampf(this.MaxSpeed.mul(-1), this.MaxSpeed);
+        this.vVelocity = TruncateByVec2Mag(this.MaxSpeed,this.vVelocity);
 
         var posOffset = this.vVelocity.mul(dt);
         var posNow = this.node.position;
         var posNext = posNow.add(posOffset);
         this.node.position = posNext;
 
-        if(this.vVelocity.mag() > 0.000001){
+        if(this.vVelocity.mag() > 0.1){
             this.vHeading = this.vVelocity.normalize();
             this.vSide = this.vHeading.rotate(-Math.PI/2);
         }
@@ -89,5 +90,22 @@ cc.Class({
         var angle = cc.Vec2.UP.signAngle(this.vHeading);
         var degree = angle/Math.PI*180;
         this.node.angle = degree;
+
+        this.wrapWinSize();
     },
+
+    wrapWinSize(){
+        if(this.node.x > cc.winSize.width/2){
+            this.node.x = -cc.winSize.width/2;
+        }
+        if(this.node.x < -cc.winSize.width/2){
+            this.node.x = cc.winSize.width/2;
+        }
+        if(this.node.y > cc.winSize.height/2){
+            this.node.y = -cc.winSize.height/2;
+        }
+        if(this.node.y < -cc.winSize.height/2){
+            this.node.y = cc.winSize.height/2;
+        }
+    }
 });

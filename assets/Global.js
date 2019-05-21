@@ -59,4 +59,18 @@ window.EventCenter = {
             }
         }
     },
+};
+window.MapNum = function(targetNum,srcStart,srcEnd,targetStart,targetEnd){
+    var srcArea = srcEnd - srcStart;
+    var targetArea = targetEnd - targetStart;
+    var targetOffset = targetNum - srcStart;
+    return targetStart+targetOffset/srcArea*targetArea;
+};
+window.TruncateByVec2Mag = function(limitMag,vec){
+    var vecMag = vec.mag();
+    if(limitMag < vecMag){
+        return vec.normalize().mul(limitMag);
+    }else{
+        return vec;
+    }
 }

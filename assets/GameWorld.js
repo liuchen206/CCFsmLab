@@ -39,10 +39,14 @@ cc.Class({
             var newVec2 = this.node.convertToNodeSpaceAR(new cc.Vec2(event.getLocationX(),event.getLocationY()));
             this.crossHair.position = newVec2;
         }, this);
+        this.node.on('touchstart', function (event) {
+            var newVec2 = this.node.convertToNodeSpaceAR(new cc.Vec2(event.getLocationX(),event.getLocationY()));
+            this.crossHair.position = newVec2;
+        }, this);
     },
 
     start () {
-        
+
     },
 
     // update (dt) {},

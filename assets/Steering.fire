@@ -341,18 +341,9 @@
       "x": 0,
       "y": 0
     },
-    "MaxSpeed": {
-      "__type__": "cc.Vec2",
-      "x": 200,
-      "y": 200
-    },
-    "MaxForce": {
-      "__type__": "cc.Vec2",
-      "x": 100,
-      "y": 100
-    },
+    "MaxSpeed": 300,
+    "MaxForce": 400,
     "Mass": 1,
-    "MaxTurnRate": 1,
     "_id": "e5tmHQWmlHhaymVl9iR8zn"
   },
   {
@@ -368,6 +359,9 @@
       "x": 0,
       "y": 0
     },
+    "beSeek": false,
+    "beFlee": false,
+    "beArrive": true,
     "_id": "30f+5W6W1IlYsp6HQd0m67"
   },
   {

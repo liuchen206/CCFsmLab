@@ -27,6 +27,9 @@ cc.Class({
         //     }
         // },
         vSteeringForce:cc.Vec2,
+        beSeek:false,
+        beFlee:false,
+        beArrive:false,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -36,20 +39,50 @@ cc.Class({
     },
 
     start () {
-
+        // cc.log('MapNum：：',MapNum(50,0,100,50,100));
+        // cc.log('MapNum：：',MapNum(0,-50,50,0,100));
     },
 
     // update (dt) {},
 
     Calculate(){
         this.vSteeringForce = cc.Vec2.ZERO;
-
-        this.vSteeringForce.addSelf(this.Seek(this.AutoPlayerJS.GameWorldJS.crossHair.position));
-
+        if(this.beSeek){
+            this.vSteeringForce.addSelf(this.Seek(this.AutoPlayerJS.GameWorldJS.crossHair.position));
+        }
+        if(this.beFlee){
+            this.vSteeringForce.addSelf(this.Flee(this.AutoPlayerJS.GameWorldJS.crossHair.position));
+        }
+        if(this.beArrive){
+            this.vSteeringForce.addSelf(this.Arrive(this.AutoPlayerJS.GameWorldJS.crossHair.position));
+        }
         return this.vSteeringForce;
     },
     Seek(targetPos){
-        var desiredVelocity = (targetPos.sub(this.AutoPlayerJS.node.position)).normalize().mul(this.AutoPlayerJS.MaxSpeed.mag());
+        var desiredVelocity = (targetPos.sub(this.AutoPlayerJS.node.position)).normalize().mul(this.AutoPlayerJS.MaxSpeed);
         return desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
+    },
+    Flee(targetPos){
+        var desiredVelocity = (targetPos.sub(this.AutoPlayerJS.node.position)).normalize().mul(this.AutoPlayerJS.MaxSpeed);
+        desiredVelocity.negSelf();
+        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
+    },
+    Arrive(targetPos){
+        var toTargetVec2 = targetPos.sub(this.AutoPlayerJS.node.position);
+        var toTargetDis = toTargetVec2.mag();
+        var subSpeedRadio = 200;
+        if(toTargetDis > subSpeedRadio){
+            var desiredVelocity = toTargetVec2.normalize().mul(this.AutoPlayerJS.MaxSpeed);
+            return desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
+        }else{
+            if(toTargetDis > 5){
+                var subSpeed = MapNum(toTargetDis,0,subSpeedRadio,0,this.AutoPlayerJS.MaxSpeed);
+                var desiredVelocity = toTargetVec2.normalize().mul(subSpeed);
+                return desiredVelocity.sub(this.AutoPlayerJS.vVelocity).mul(50);
+            }else{
+                this.AutoPlayerJS.vVelocity = cc.Vec2.ZERO;
+                return cc.Vec2.ZERO;
+            }
+        }
     },
 });

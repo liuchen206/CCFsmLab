@@ -54,7 +54,8 @@
     },
     "_is3DNode": true,
     "groupIndex": 0,
-    "_id": "97gl7fjJhOtKHcH4jhGGUP"
+    "autoReleaseAssets": false,
+    "_id": "a80c89f3-1660-4f2d-92ad-1d388a55b629"
   },
   {
     "__type__": "cc.Node",

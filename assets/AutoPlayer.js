@@ -7,6 +7,8 @@
 // Learn life-cycle callbacks:
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
 //  - [English] https://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
+
+// var noise = require('perlin')
 cc.Class({
     extends: cc.Component,
 
@@ -28,7 +30,6 @@ cc.Class({
         // },
         vVelocity:cc.Vec2,
         vHeading:cc.Vec2,
-        vSide:cc.Vec2,
         MaxSpeed:200,
         MaxForce:200,
         Mass:1,
@@ -44,6 +45,12 @@ cc.Class({
         cc.log("data : ",data.data);
     },
     start () {
+        // noise.seed(Math.random());
+        // cc.log('noise0',noise.perlin2(0,0))
+        // cc.log('noise0.1',noise.perlin2(0.1,0))
+
+        // cc.log("dot ::",cc.Vec2.UP.dot(cc.Vec2.UP.rotate(Math.PI/4))); 
+
         // var a = cc.Vec2.UP.rotate(Math.PI/2);
         // var b = cc.Vec2.UP.rotate(90);
         // cc.log('a = ',a.toString());
@@ -68,29 +75,33 @@ cc.Class({
     },
 
     update (dt) {
+        // var from = new cc.Vec2(0,0);
+        // var to = new cc.Vec2(100,0);
+        // var lerpNum = from.lerp(to,dt);
+        // cc.log('lerpNum,',lerpNum.toString());
+
         steeringForce = cc.Vec2.ZERO;
         // 计算行为合力
         var steeringForce = this.SteeringBehaviorsJS.Calculate();
         steeringForce = TruncateByVec2Mag(this.MaxForce,steeringForce);
-        // cc.log('steeringForce=',steeringForce.toString()); 
+        cc.log('steeringForce=',steeringForce.toString()); 
         var acc = steeringForce.div(this.Mass);
+        // 计算瞬时速度
         this.vVelocity.addSelf(acc.mul(dt));
         this.vVelocity = TruncateByVec2Mag(this.MaxSpeed,this.vVelocity);
-
+        // 计算位移
         var posOffset = this.vVelocity.mul(dt);
         var posNow = this.node.position;
         var posNext = posNow.add(posOffset);
         this.node.position = posNext;
-
-        if(this.vVelocity.mag() > 0.1){
+        // 计算朝向（向量）
+        if(this.vVelocity.mag() > 1){
             this.vHeading = this.vVelocity.normalize();
-            this.vSide = this.vHeading.rotate(-Math.PI/2);
+            // 计算朝向（角度）
+            var angle = cc.Vec2.UP.signAngle(this.vHeading);
+            var degree = angle/Math.PI*180;
+            this.node.angle = degree;
         }
-
-        var angle = cc.Vec2.UP.signAngle(this.vHeading);
-        var degree = angle/Math.PI*180;
-        this.node.angle = degree;
-
         this.wrapWinSize();
     },
 

@@ -7,6 +7,7 @@
 // Learn life-cycle callbacks:
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
 //  - [English] https://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
+var noise = require('perlin')
 cc.Class({
     extends: cc.Component,
 
@@ -26,12 +27,17 @@ cc.Class({
         //         this._bar = value;
         //     }
         // },
-        vSteeringForce:cc.Vec2,
+        pursuitTarget:cc.Node,
+        evadeTarget:cc.Node,
         beSeek:false,
         beFlee:false,
         beArrive:false,
+        bePursuit:false,
+        beEvade:false,
+        beWander:false,
+        vSteeringForce:cc.Vec2,
+        elapseTime:0,
     },
-
     // LIFE-CYCLE CALLBACKS:
 
     onLoad () {
@@ -41,9 +47,13 @@ cc.Class({
     start () {
         // cc.log('MapNum：：',MapNum(50,0,100,50,100));
         // cc.log('MapNum：：',MapNum(0,-50,50,0,100));
+
+        noise.seed(Math.random());
     },
 
-    // update (dt) {},
+    update (dt) {
+        this.elapseTime += dt;
+    },
 
     Calculate(){
         this.vSteeringForce = cc.Vec2.ZERO;
@@ -55,6 +65,15 @@ cc.Class({
         }
         if(this.beArrive){
             this.vSteeringForce.addSelf(this.Arrive(this.AutoPlayerJS.GameWorldJS.crossHair.position));
+        }
+        if(this.bePursuit){
+            this.vSteeringForce.addSelf(this.Pursuit(this.pursuitTarget.getComponent('AutoPlayer')));
+        }
+        if(this.beEvade){
+            this.vSteeringForce.addSelf(this.Evade(this.evadeTarget.getComponent('AutoPlayer')));
+        }
+        if(this.beWander){
+            this.vSteeringForce.addSelf(this.Wander());
         }
         return this.vSteeringForce;
     },
@@ -85,4 +104,28 @@ cc.Class({
             }
         }
     },
+    Pursuit(evader){
+        var toPursuitPlayer = evader.node.position.sub(this.AutoPlayerJS.node.position);
+        if(toPursuitPlayer.dot(this.AutoPlayerJS.vHeading) > 0 && this.AutoPlayerJS.vHeading.dot(evader.vHeading) <-0.95){
+            return this.Seek(evader.node.position);
+        }
+        var lookAhead = toPursuitPlayer.mag()/(this.AutoPlayerJS.MaxSpeed + evader.vVelocity.mag());
+        return this.Seek(evader.node.position.add(evader.vVelocity.mul(lookAhead)));
+    },
+    Evade(pursuer){
+        var toPursuer = pursuer.node.position.sub(this.AutoPlayerJS.node.position);
+        var threatRange = 200;
+        if(toPursuer.mag() > threatRange){
+            return cc.Vec2.ZERO;
+        }
+        var lookAhead = toPursuer.mag()/(this.AutoPlayerJS.MaxSpeed + pursuer.vVelocity.mag());
+        return this.Flee(pursuer.node.position.add(pursuer.vVelocity.mul(lookAhead)));
+    },
+    Wander(){
+        var berlinX = noise.perlin2(this.elapseTime,this.elapseTime);  
+        var berlinY = noise.perlin2(-this.elapseTime,-this.elapseTime);  
+        var randomForceX = MapNum(berlinX,-1,1,-this.AutoPlayerJS.MaxForce,this.AutoPlayerJS.MaxForce);
+        var randomForceY = MapNum(berlinY,-1,1,-this.AutoPlayerJS.MaxForce,this.AutoPlayerJS.MaxForce);
+        return new cc.Vec2(randomForceX,randomForceY);
+    }
 });

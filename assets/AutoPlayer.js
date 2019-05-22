@@ -33,6 +33,7 @@ cc.Class({
         MaxSpeed:200,
         MaxForce:200,
         Mass:1,
+        rigidbody:cc.RigidBody,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -40,6 +41,8 @@ cc.Class({
     onLoad () {
         this.GameWorldJS = cc.find("Canvas").getComponent('GameWorld');
         this.SteeringBehaviorsJS = this.node.getComponent('SteeringBehaviors');
+
+        cc.director.getPhysicsManager().enabled = true;
     },
     TestCallBack: function(data){
         cc.log("data : ",data.data);
@@ -84,16 +87,18 @@ cc.Class({
         // 计算行为合力
         var steeringForce = this.SteeringBehaviorsJS.Calculate();
         steeringForce = TruncateByVec2Mag(this.MaxForce,steeringForce);
-        cc.log('steeringForce=',steeringForce.toString()); 
+        // cc.log('steeringForce=',steeringForce.toString()); 
         var acc = steeringForce.div(this.Mass);
         // 计算瞬时速度
         this.vVelocity.addSelf(acc.mul(dt));
         this.vVelocity = TruncateByVec2Mag(this.MaxSpeed,this.vVelocity);
         // 计算位移
-        var posOffset = this.vVelocity.mul(dt);
-        var posNow = this.node.position;
-        var posNext = posNow.add(posOffset);
-        this.node.position = posNext;
+        // var posOffset = this.vVelocity.mul(dt);
+        // var posNow = this.node.position;
+        // var posNext = posNow.add(posOffset);
+        // this.node.position = posNext;
+        // 计算刚体线性速度
+        this.rigidbody.linearVelocity = this.vVelocity;
         // 计算朝向（向量）
         if(this.vVelocity.mag() > 1){
             this.vHeading = this.vVelocity.normalize();

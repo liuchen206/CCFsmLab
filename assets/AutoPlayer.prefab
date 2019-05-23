@@ -173,12 +173,12 @@
     "_enabled": true,
     "pursuitTarget": null,
     "evadeTarget": null,
-    "beSeek": false,
+    "beSeek": true,
     "beFlee": false,
     "beArrive": false,
     "bePursuit": false,
     "beEvade": false,
-    "beWander": true,
+    "beWander": false,
     "vSteeringForce": {
       "__type__": "cc.Vec2",
       "x": 0,
@@ -391,7 +391,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "0b6894ba-14ed-4640-b52c-9cd72c0ac19e"
     },
     "fileId": "29FIOIa0hECa4qAzpqkvC1",
     "sync": false

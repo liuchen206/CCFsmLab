@@ -1,0 +1,32 @@
+{
+  "ver": "2.3.0",
+  "uuid": "fba4772b-743b-403c-806c-3bbe4f000c76",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "platformSettings": {},
+  "subMetas": {
+    "Space Asteroid Small 2": {
+      "ver": "1.0.4",
+      "uuid": "8fd18127-cdb6-4f5a-9daf-3ae66c45f3ee",
+      "rawTextureUuid": "fba4772b-743b-403c-806c-3bbe4f000c76",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 200,
+      "height": 182,
+      "rawWidth": 200,
+      "rawHeight": 182,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

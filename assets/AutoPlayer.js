@@ -41,13 +41,11 @@ cc.Class({
     onLoad () {
         this.GameWorldJS = cc.find("Canvas").getComponent('GameWorld');
         this.SteeringBehaviorsJS = this.node.getComponent('SteeringBehaviors');
-
-        cc.director.getPhysicsManager().enabled = true;
     },
     TestCallBack: function(data){
         cc.log("data : ",data.data);
     },
-    start () {
+    start () {      
         // noise.seed(Math.random());
         // cc.log('noise0',noise.perlin2(0,0))
         // cc.log('noise0.1',noise.perlin2(0.1,0))
@@ -108,6 +106,7 @@ cc.Class({
             this.node.angle = degree;
         }
         this.wrapWinSize();
+
     },
 
     wrapWinSize(){
@@ -123,5 +122,26 @@ cc.Class({
         if(this.node.y < -cc.winSize.height/2){
             this.node.y = cc.winSize.height/2;
         }
+    },
+    // 只在两个碰撞体开始接触时被调用一次
+    onBeginContact: function (contact, selfCollider, otherCollider) {
+        // cc.log('onBeginContact');
+        // var worldManifold = contact.getWorldManifold();
+        // var points = worldManifold.points;
+        // var normal = worldManifold.normal;
+        // cc.log('contact data ',points.length,normal.toString(),selfCollider.tag,otherCollider.tag);
+    },
+    // 只在两个碰撞体结束接触时被调用一次
+    onEndContact: function (contact, selfCollider, otherCollider) {
+        // cc.log('onEndContact');
+    },
+
+    // 每次将要处理碰撞体接触逻辑时被调用
+    onPreSolve: function (contact, selfCollider, otherCollider) {
+        // cc.log('onPreSolve');
+    },
+    // 每次处理完碰撞体接触逻辑时被调用
+    onPostSolve: function (contact, selfCollider, otherCollider) {
+        // cc.log('onPostSolve');
     }
 });

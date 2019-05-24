@@ -35,8 +35,11 @@ cc.Class({
         bePursuit:false,
         beEvade:false,
         beWander:false,
+        beObstacleAvoidance:false,
         vSteeringForce:cc.Vec2,
         elapseTime:0,
+        graphics:cc.Graphics,
+        isShowDrawDebugGraphics:true,
     },
     // LIFE-CYCLE CALLBACKS:
 
@@ -54,7 +57,6 @@ cc.Class({
     update (dt) {
         this.elapseTime += dt;
     },
-
     Calculate(){
         this.vSteeringForce = cc.Vec2.ZERO;
         if(this.beSeek){
@@ -74,6 +76,9 @@ cc.Class({
         }
         if(this.beWander){
             this.vSteeringForce.addSelf(this.Wander());
+        }
+        if(this.beObstacleAvoidance){
+            this.vSteeringForce.addSelf(this.ObstacleAvoidance());
         }
         return this.vSteeringForce;
     },
@@ -127,5 +132,108 @@ cc.Class({
         var randomForceX = MapNum(berlinX,-1,1,-this.AutoPlayerJS.MaxForce,this.AutoPlayerJS.MaxForce);
         var randomForceY = MapNum(berlinY,-1,1,-this.AutoPlayerJS.MaxForce,this.AutoPlayerJS.MaxForce);
         return new cc.Vec2(randomForceX,randomForceY);
+    },
+    ObstacleAvoidance(){
+        // 1, 检测是否探测到障碍物
+        this.graphics.clear();
+
+        var minDetectorLength = this.node.height/2;
+        var maxDetectorLength = this.node.height*2;
+        // var rectHeight = 300;
+        var rectHeight = minDetectorLength + this.AutoPlayerJS.vVelocity.mag()/this.AutoPlayerJS.MaxSpeed*maxDetectorLength;
+        var midStart = new cc.Vec2(0,0)
+        // 生成探针
+        var sensorList = this.makeSendors(rectHeight,midStart); 
+        // 被触发的探针
+        var activeSensor = null;
+        // 逐个检测
+        for(var i = 0;i < sensorList.length;i++){
+            var worldPosStart = this.node.convertToWorldSpaceAR(midStart);
+            var worldPosEnd = this.node.convertToWorldSpaceAR(sensorList[i]['data']);
+            var results = cc.director.getPhysicsManager().rayCast(worldPosStart, worldPosEnd, cc.RayCastType.All);
+            for (var j = 0; j < results.length; j++) {
+                var result = results[j];
+                var collider = result.collider;
+                var point = result.point;
+                var normal = result.normal;
+                var fraction = result.fraction;
+                if(collider.tag == EnumOfColliderTag.ObstacleCollider){ //仅仅检测障碍物
+                    sensorList[i]['data'] = this.graphics.node.convertToNodeSpaceAR(point);
+                    // 绘制 辅助线(击中点)
+                    if(this.isShowDrawDebugGraphics){
+                        this.graphics.circle(sensorList[i]['data'].x, sensorList[i]['data'].y, 8);
+                    }
+
+                    if(activeSensor !== null){
+                        if(sensorList[i]['weight'] > activeSensor['weight']){
+                            activeSensor = sensorList[i];
+                        }
+                    }else{
+                        activeSensor = sensorList[i];
+                    }
+                }
+            }
+        }
+
+        // 绘制 辅助线
+        if(this.isShowDrawDebugGraphics){
+            this.graphics.strokeColor = cc.Color.GREEN;
+            for(var i = 0;i < sensorList.length;i++){
+                this.graphics.moveTo(0, 0);
+                this.graphics.lineTo(sensorList[i]['data'].x, sensorList[i]['data'].y);
+            }
+            this.graphics.stroke();
+            if(activeSensor !== null){
+                this.graphics.strokeColor = cc.Color.RED;
+                this.graphics.moveTo(0, 0);
+                this.graphics.lineTo(activeSensor['data'].x, activeSensor['data'].y);
+                this.graphics.stroke();
+            }        
+        }
+
+
+        // 最后步骤：计算出新的转向力
+        var steeringForce = cc.Vec2.ZERO;
+        if(activeSensor !== null){
+            var derectVec = null;
+            if(activeSensor['derect'] === 0){
+                derectVec = activeSensor['data'].rotate(Math.PI/2);
+            }else if(activeSensor['derect'] < 0){// 属于左侧探针，应取向右的方向
+                derectVec = activeSensor['data'].rotate(-Math.PI/2);
+            }else{
+                derectVec = activeSensor['data'].rotate(Math.PI/2);
+            }
+            derectVec = derectVec.normalize().mul(activeSensor['data'].mag());
+            // 三类点：1，player坐标系中绘制辅助线的点。2，世界坐标系下的射线检测点。3，射线检测结果转为canvas中的位置坐标点
+            var canvasPos = cc.find("Canvas").convertToNodeSpaceAR(this.graphics.node.convertToWorldSpaceAR(derectVec)); // canvas中的pos
+
+            steeringForce = this.Arrive(canvasPos);
+            // cc.log('canvasPos ==',canvasPos.toString());
+            if(this.isShowDrawDebugGraphics){
+                this.graphics.strokeColor = cc.Color.YELLOW;
+                this.graphics.moveTo(0, 0);
+                this.graphics.lineTo(derectVec.x, derectVec.y);
+                this.graphics.circle(derectVec.x, derectVec.y, 8);
+                this.graphics.stroke(); 
+            }
+
+        }
+        return steeringForce;
+    },
+    makeSendors(rectHeight,midStart){
+        // 中间
+        var midEnd = new cc.Vec2(0,rectHeight)
+        var mid0 = midEnd.sub(midStart);
+        // 左偏 30
+        var left30 = mid0.rotate(Math.PI/6);
+        // 左偏 60
+        var left60 = mid0.rotate(Math.PI/3);
+        // 右偏 30
+        var right30 = mid0.rotate(-Math.PI/6);
+        // 右偏 60
+        var right60 = mid0.rotate(-Math.PI/3);
+
+        var sensorList = [{data:left60,weight:3,derect:-1},{data:left30,weight:2,derect:-1},{data:mid0,weight:1,derect:0},{data:right30,weight:2,derect:1},{data:right60,weight:3,derect:1}];
+        return sensorList;
     }
 });

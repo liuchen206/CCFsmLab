@@ -73,4 +73,9 @@ window.TruncateByVec2Mag = function(limitMag,vec){
     }else{
         return vec;
     }
-}
+};
+window.EnumOfColliderTag = {
+    PlayerCollider: 1, // player碰撞器 tag
+    ObstacleCollider: 2, // 障碍物碰撞器 tag
+    wallCollider: 3, // 墙壁碰撞器 tag
+};

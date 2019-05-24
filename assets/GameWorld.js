@@ -35,6 +35,22 @@ cc.Class({
     // LIFE-CYCLE CALLBACKS:
 
     onLoad () {
+        // cc.director.getCollisionManager().enabled = true;
+        // cc.director.getCollisionManager().enabledDebugDraw = true;
+        // cc.director.getCollisionManager().enabledDrawBoundingBox = true;
+        cc.director.getPhysicsManager().enabled = true;
+        cc.director.getPhysicsManager().debugDrawFlags = cc.PhysicsManager.DrawBits.e_shapeBit;
+        // cc.PhysicsManager.DrawBits.e_aabbBit |
+        // cc.PhysicsManager.DrawBits.e_pairBit |
+        // cc.PhysicsManager.DrawBits.e_centerOfMassBit |
+        // cc.PhysicsManager.DrawBits.e_jointBit |
+        // cc.PhysicsManager.DrawBits.e_shapeBit;
+        
+        // 本地坐标变换为世界坐标
+        // this.anParentNode.convertToWorldSpaceAR(localPositonOfChild);
+        //  世界坐标变换为本地坐标
+        // this.node.convertToNodeSpaceAR(anWorldPosition);
+
         this.node.on('mousedown', function (event) {
             var newVec2 = this.node.convertToNodeSpaceAR(new cc.Vec2(event.getLocationX(),event.getLocationY()));
             this.crossHair.position = newVec2;

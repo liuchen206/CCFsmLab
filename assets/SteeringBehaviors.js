@@ -29,6 +29,8 @@ cc.Class({
         // },
         pursuitTarget:cc.Node,
         evadeTarget:cc.Node,
+        interposePlayerA:cc.Node,
+        interposePlayerB:cc.Node,
         beSeek:false,
         beFlee:false,
         beArrive:false,
@@ -37,6 +39,7 @@ cc.Class({
         beWander:false,
         beObstacleAvoidance:false,
         beWallAvoidance:false,
+        beInterpose:false,
         vSteeringForce:cc.Vec2,
         elapseTime:0,
         graphics:cc.Graphics,
@@ -84,6 +87,9 @@ cc.Class({
         }
         if(this.beWallAvoidance){
             this.vSteeringForce.addSelf(this.WallAvoidance());
+        }
+        if(this.beInterpose){
+            this.vSteeringForce.addSelf(this.Interpose(this.interposePlayerB.getComponent('AutoPlayer'),this.interposePlayerA.getComponent('AutoPlayer')));
         }
         return this.vSteeringForce;
     },
@@ -293,5 +299,24 @@ cc.Class({
             return steeringForce;
         }
         return cc.Vec2.ZERO;
+    },
+    Interpose(playerA,playerB){
+        var currentMidPoint = playerA.node.position.add(playerB.node.position).div(2);
+        var timeToReachCurrentMidPoint = currentMidPoint.sub(this.AutoPlayerJS.node.position).mag()/this.AutoPlayerJS.MaxSpeed;
+
+        var playerAPosInFuture = playerA.node.position.add(playerA.vVelocity.mul(timeToReachCurrentMidPoint));
+        var playerBPosInFuture = playerB.node.position.add(playerB.vVelocity.mul(timeToReachCurrentMidPoint));
+
+        var futureMidPoint = playerAPosInFuture.add(playerBPosInFuture).div(2);
+
+        if(this.isShowDrawDebugGraphics){
+            var posInGraphics = this.node.convertToNodeSpaceAR(this.node.parent.convertToWorldSpaceAR(futureMidPoint));
+            this.graphics.strokeColor = cc.Color.GREEN;
+            this.graphics.circle(posInGraphics.x, posInGraphics.y, 8);
+            this.graphics.stroke();
+            cc.log("posInGraphics ",posInGraphics.toString());
+        }
+
+        return this.Arrive(futureMidPoint);
     },
 });

@@ -90,16 +90,26 @@ cc.Class({
         // 计算瞬时速度
         this.vVelocity.addSelf(acc.mul(dt));
         this.vVelocity = TruncateByVec2Mag(this.MaxSpeed,this.vVelocity);
-        // 计算位移
+        // 计算位移，使其移动
         // var posOffset = this.vVelocity.mul(dt);
         // var posNow = this.node.position;
         // var posNext = posNow.add(posOffset);
         // this.node.position = posNext;
-        // 计算刚体线性速度
+        // 计算刚体线性速度，使其移动
         this.rigidbody.linearVelocity = this.vVelocity;
+        // 施加力，使其移动
+        // this.rigidbody.applyForceToCenter(steeringForce);
+
+        // var posInGraphics = this.SteeringBehaviorsJS.graphics.node.convertToNodeSpaceAR(this.node.parent.convertToWorldSpaceAR(steeringForce));
+        // this.SteeringBehaviorsJS.graphics.clear();
+        // this.SteeringBehaviorsJS.graphics.strokeColor = cc.Color.GREEN;
+        // this.SteeringBehaviorsJS.graphics.moveTo(0, 0);
+        // this.SteeringBehaviorsJS.graphics.lineTo(posInGraphics.x,posInGraphics.y);
+        // this.SteeringBehaviorsJS.graphics.stroke();
+
         // 计算朝向（向量）
-        if(this.vVelocity.mag() > 1){
-            this.vHeading = this.vVelocity.normalize();
+        if(this.rigidbody.linearVelocity.mag() > 1){
+            this.vHeading = this.rigidbody.linearVelocity.normalize();
             // 计算朝向（角度）
             var angle = cc.Vec2.UP.signAngle(this.vHeading);
             var degree = angle/Math.PI*180;

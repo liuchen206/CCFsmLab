@@ -63,8 +63,8 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": 105.546,
-      "y": 183.509,
+      "x": 26.062,
+      "y": -37.256,
       "z": 0
     },
     "_scale": {
@@ -77,8 +77,8 @@
       "__type__": "cc.Quat",
       "x": 0,
       "y": 0,
-      "z": 0,
-      "w": 1
+      "z": -0.3826834323650898,
+      "w": 0.9238795325112867
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -235,8 +235,8 @@
       "x": 0,
       "y": 0
     },
-    "MaxSpeed": 300,
-    "MaxForce": 400,
+    "MaxSpeed": 3000,
+    "MaxForce": 1200,
     "Mass": 1,
     "rigidbody": {
       "__id__": 7
@@ -253,8 +253,8 @@
     "_enabled": true,
     "_type": 2,
     "_allowSleep": true,
-    "_gravityScale": -0.2,
-    "_linearDamping": 0,
+    "_gravityScale": 0,
+    "_linearDamping": 5,
     "_angularDamping": 0,
     "_linearVelocity": {
       "__type__": "cc.Vec2",
@@ -278,13 +278,17 @@
     "_enabled": true,
     "pursuitTarget": null,
     "evadeTarget": null,
+    "interposePlayerA": null,
+    "interposePlayerB": null,
     "beSeek": false,
     "beFlee": false,
     "beArrive": true,
     "bePursuit": false,
     "beEvade": false,
     "beWander": false,
-    "beObstacleAvoidance": true,
+    "beObstacleAvoidance": false,
+    "beWallAvoidance": false,
+    "beInterpose": false,
     "vSteeringForce": {
       "__type__": "cc.Vec2",
       "x": 0,
@@ -294,6 +298,7 @@
     "graphics": {
       "__id__": 3
     },
+    "isShowDrawDebugGraphics": true,
     "_id": ""
   },
   {

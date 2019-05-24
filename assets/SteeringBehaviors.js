@@ -105,19 +105,20 @@ cc.Class({
     Arrive(targetPos){
         var toTargetVec2 = targetPos.sub(this.AutoPlayerJS.node.position);
         var toTargetDis = toTargetVec2.mag();
-        var subSpeedRadio = 200;
-        if(toTargetDis > subSpeedRadio){
+        var subSpeedRadio = 100;
+        if(toTargetDis < subSpeedRadio){
+            // 全力减速到 0 
+            if(this.AutoPlayerJS.vVelocity.mag() > 50){
+                var desiredVelocity = this.AutoPlayerJS.vVelocity.normalize().neg().mul(this.AutoPlayerJS.MaxSpeed);
+                return desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
+            }else{
+                var subSpeed = MapNum(toTargetDis,0,subSpeedRadio,0,this.AutoPlayerJS.MaxSpeed);
+                var desiredVelocity = toTargetVec2.normalize().mul(subSpeed*0.1);
+                return desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
+            }
+        }else{
             var desiredVelocity = toTargetVec2.normalize().mul(this.AutoPlayerJS.MaxSpeed);
             return desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
-        }else{
-            if(toTargetDis > 5){
-                var subSpeed = MapNum(toTargetDis,0,subSpeedRadio,0,this.AutoPlayerJS.MaxSpeed);
-                var desiredVelocity = toTargetVec2.normalize().mul(subSpeed);
-                return desiredVelocity.sub(this.AutoPlayerJS.vVelocity).mul(50);
-            }else{
-                this.AutoPlayerJS.vVelocity = cc.Vec2.ZERO;
-                return cc.Vec2.ZERO;
-            }
         }
     },
     Pursuit(evader){
@@ -218,18 +219,16 @@ cc.Class({
         var steeringForce = cc.Vec2.ZERO;
         if(activeSensor !== null){
             var derectVec = null;
-            if(activeSensor['derect'] === 0){
-                derectVec = activeSensor['data'].rotate(Math.PI/2);
-            }else if(activeSensor['derect'] < 0){// 属于左侧探针，应取向右的方向
-                derectVec = activeSensor['data'].rotate(-Math.PI/2);
+            if(activeSensor['derect'] < 0){// 属于左侧探针，应取向右的方向
+                derectVec = activeSensor['data'].rotate(-Math.PI*2/3);
             }else{
-                derectVec = activeSensor['data'].rotate(Math.PI/2);
+                derectVec = activeSensor['data'].rotate(Math.PI*2/3);
             }
             derectVec = derectVec.normalize().mul(activeSensor['data'].mag());
             // 三类点：1，player坐标系中绘制辅助线的点。2，世界坐标系下的射线检测点。3，射线检测结果转为canvas中的位置坐标点
             var canvasPos = cc.find("Canvas").convertToNodeSpaceAR(this.graphics.node.convertToWorldSpaceAR(derectVec)); // canvas中的pos
 
-            steeringForce = this.Arrive(canvasPos);
+            steeringForce = this.Seek(canvasPos);
             // cc.log('canvasPos ==',canvasPos.toString());
             if(this.isShowDrawDebugGraphics){
                 this.graphics.strokeColor = cc.Color.YELLOW;
@@ -314,7 +313,7 @@ cc.Class({
             this.graphics.strokeColor = cc.Color.GREEN;
             this.graphics.circle(posInGraphics.x, posInGraphics.y, 8);
             this.graphics.stroke();
-            cc.log("posInGraphics ",posInGraphics.toString());
+            // cc.log("posInGraphics ",posInGraphics.toString());
         }
 
         return this.Arrive(futureMidPoint);

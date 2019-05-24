@@ -36,6 +36,7 @@ cc.Class({
         beEvade:false,
         beWander:false,
         beObstacleAvoidance:false,
+        beWallAvoidance:false,
         vSteeringForce:cc.Vec2,
         elapseTime:0,
         graphics:cc.Graphics,
@@ -58,6 +59,7 @@ cc.Class({
         this.elapseTime += dt;
     },
     Calculate(){
+        this.graphics.clear();
         this.vSteeringForce = cc.Vec2.ZERO;
         if(this.beSeek){
             this.vSteeringForce.addSelf(this.Seek(this.AutoPlayerJS.GameWorldJS.crossHair.position));
@@ -79,6 +81,9 @@ cc.Class({
         }
         if(this.beObstacleAvoidance){
             this.vSteeringForce.addSelf(this.ObstacleAvoidance());
+        }
+        if(this.beWallAvoidance){
+            this.vSteeringForce.addSelf(this.WallAvoidance());
         }
         return this.vSteeringForce;
     },
@@ -129,21 +134,31 @@ cc.Class({
     Wander(){
         var berlinX = noise.perlin2(this.elapseTime,this.elapseTime);  
         var berlinY = noise.perlin2(-this.elapseTime,-this.elapseTime);  
-        var randomForceX = MapNum(berlinX,-1,1,-this.AutoPlayerJS.MaxForce,this.AutoPlayerJS.MaxForce);
-        var randomForceY = MapNum(berlinY,-1,1,-this.AutoPlayerJS.MaxForce,this.AutoPlayerJS.MaxForce);
+        var randomForceX = MapNum(berlinX,-1,1,-this.AutoPlayerJS.MaxSpeed,this.AutoPlayerJS.MaxSpeed);
+        var randomForceY = MapNum(berlinY,-1,1,-this.AutoPlayerJS.MaxSpeed,this.AutoPlayerJS.MaxSpeed);
         return new cc.Vec2(randomForceX,randomForceY);
     },
     ObstacleAvoidance(){
         // 1, 检测是否探测到障碍物
-        this.graphics.clear();
-
         var minDetectorLength = this.node.height/2;
         var maxDetectorLength = this.node.height*2;
         // var rectHeight = 300;
         var rectHeight = minDetectorLength + this.AutoPlayerJS.vVelocity.mag()/this.AutoPlayerJS.MaxSpeed*maxDetectorLength;
         var midStart = new cc.Vec2(0,0)
         // 生成探针
-        var sensorList = this.makeSendors(rectHeight,midStart); 
+        // 中间
+        var midEnd = new cc.Vec2(0,rectHeight)
+        var mid0 = midEnd.sub(midStart);
+        // 左偏 30
+        var left30 = mid0.rotate(Math.PI/6);
+        // 左偏 60
+        var left60 = mid0.rotate(Math.PI/3);
+        // 右偏 30
+        var right30 = mid0.rotate(-Math.PI/6);
+        // 右偏 60
+        var right60 = mid0.rotate(-Math.PI/3);
+
+        var sensorList = [{data:left60,weight:3,derect:-1},{data:left30,weight:2,derect:-1},{data:mid0,weight:1,derect:0},{data:right30,weight:2,derect:1},{data:right60,weight:3,derect:1}];
         // 被触发的探针
         var activeSensor = null;
         // 逐个检测
@@ -171,6 +186,7 @@ cc.Class({
                     }else{
                         activeSensor = sensorList[i];
                     }
+                    break;
                 }
             }
         }
@@ -220,20 +236,62 @@ cc.Class({
         }
         return steeringForce;
     },
-    makeSendors(rectHeight,midStart){
+    WallAvoidance(){
+        // 1, 检测是否探测到墙壁
+        var minDetectorLength = this.node.height/2;
+        var maxDetectorLength = this.node.height*5;
+        // var rectHeight = 300;
+        var rectHeight = minDetectorLength + this.AutoPlayerJS.vVelocity.mag()/this.AutoPlayerJS.MaxSpeed*maxDetectorLength;
+        var midStart = new cc.Vec2(0,0)
+        // 生成探针
         // 中间
         var midEnd = new cc.Vec2(0,rectHeight)
         var mid0 = midEnd.sub(midStart);
-        // 左偏 30
-        var left30 = mid0.rotate(Math.PI/6);
-        // 左偏 60
-        var left60 = mid0.rotate(Math.PI/3);
-        // 右偏 30
-        var right30 = mid0.rotate(-Math.PI/6);
-        // 右偏 60
-        var right60 = mid0.rotate(-Math.PI/3);
-
-        var sensorList = [{data:left60,weight:3,derect:-1},{data:left30,weight:2,derect:-1},{data:mid0,weight:1,derect:0},{data:right30,weight:2,derect:1},{data:right60,weight:3,derect:1}];
-        return sensorList;
-    }
+        var worldPosStart = this.node.convertToWorldSpaceAR(midStart);
+        var worldPosEnd = this.node.convertToWorldSpaceAR(mid0);
+        var results = cc.director.getPhysicsManager().rayCast(worldPosStart, worldPosEnd, cc.RayCastType.All);
+        var hitPointToCanvas = null;
+        var hitPointNormal = null;
+        for (var j = 0; j < results.length > 0; j++) {
+            var result = results[j];
+            var collider = result.collider;
+            var point = result.point;
+            var normal = result.normal;
+            var fraction = result.fraction;
+            if(collider.tag == EnumOfColliderTag.wallCollider){ //仅仅检测墙壁
+                var hitPointToGraphics = this.graphics.node.convertToNodeSpaceAR(point);
+                hitPointToCanvas = cc.find("Canvas").convertToNodeSpaceAR(point);
+                hitPointNormal = normal;
+                
+                var normalToGgraphics = this.graphics.node.convertToNodeSpaceAR(normal.mul(100).add(point));
+                // cc.log("rate info:",normalToGgraphics.toString(),normal.toString(),normal.mul(50).toString(),hitPointToGraphics.toString());
+                if(this.isShowDrawDebugGraphics){
+                    this.graphics.strokeColor = cc.Color.RED;
+                    this.graphics.moveTo(hitPointToGraphics.x, hitPointToGraphics.y);
+                    this.graphics.lineTo(normalToGgraphics.x,normalToGgraphics.y);
+                    this.graphics.circle(hitPointToGraphics.x, hitPointToGraphics.y, 8);
+                    this.graphics.stroke();
+                }
+                break;
+            }
+        }
+        if(this.isShowDrawDebugGraphics){
+            this.graphics.strokeColor = cc.Color.GREEN;
+            this.graphics.moveTo(0, 0);
+            this.graphics.lineTo(mid0.x, mid0.y);
+            this.graphics.stroke();
+        }
+        
+        // 计算合力
+        if(hitPointToCanvas !== null){
+            var distanceTohitPoint = hitPointToCanvas.sub(this.node.position).mag();
+            var rate = 1-distanceTohitPoint/rectHeight; // 距离墙壁越近值越大
+            var steeringForce = cc.Vec2.ZERO;
+            var desiredVelocity = hitPointNormal.mul(this.AutoPlayerJS.MaxSpeed*rate*10);
+            steeringForce = desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
+            // cc.log("rate info:",rate,distanceTohitPoint,rectHeight,hitPointNormal.toString(),steeringForce.toString());
+            return steeringForce;
+        }
+        return cc.Vec2.ZERO;
+    },
 });

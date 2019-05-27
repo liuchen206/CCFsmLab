@@ -42,6 +42,7 @@ cc.Class({
         beWallAvoidance:false,
         beInterpose:false,
         beHide:false,
+        bePathFollow:false,
         vSteeringForce:cc.Vec2,
         elapseTime:0,
         hideMemoryCounter:0,
@@ -102,16 +103,19 @@ cc.Class({
         if(this.beHide){
             this.vSteeringForce.addSelf(this.Hide(this.hunderPlayer.getComponent('AutoPlayer')));
         }
+        if(this.bePathFollow){
+            this.vSteeringForce.addSelf(this.PathFollow(this.AutoPlayerJS.currentPathNode));
+        }
         return this.vSteeringForce;
     },
     Seek(targetPos){
         var desiredVelocity = (targetPos.sub(this.AutoPlayerJS.node.position)).normalize().mul(this.AutoPlayerJS.MaxSpeed);
-        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
+        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity).mul(5);
     },
     Flee(targetPos){
         var desiredVelocity = (targetPos.sub(this.AutoPlayerJS.node.position)).normalize().mul(this.AutoPlayerJS.MaxSpeed);
         desiredVelocity.negSelf();
-        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
+        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity).mul(5);
     },
     Arrive(targetPos){
         var toTargetVec2 = targetPos.sub(this.AutoPlayerJS.node.position);
@@ -128,8 +132,7 @@ cc.Class({
                 return desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
             }
         }else{
-            var desiredVelocity = toTargetVec2.normalize().mul(this.AutoPlayerJS.MaxSpeed);
-            return desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
+            return this.Seek(targetPos);
         }
     },
     Pursuit(evader){
@@ -369,7 +372,7 @@ cc.Class({
                         if(collider.node.getComponent("AutoPlayer").InstanceID === hunter.InstanceID){
                             // 探测到hunter
                             isVisual = true;
-                            this.hideMemoryCounter = 7;
+                            this.hideMemoryCounter = 7; // 秒
                         }
                         sensorList[i]['data'] = this.graphics.node.convertToNodeSpaceAR(point);
                         // 绘制 辅助线(击中点)
@@ -420,4 +423,23 @@ cc.Class({
             return cc.Vec2.ZERO;
         }
     },
+    PathFollow(pathNodeToFollow){
+        var PathNodeJS = pathNodeToFollow.getComponent('PathNode');
+        var currentWayPoint = PathNodeJS.getCurrentPoint();
+        var distanveToAcceptArrive = 20;
+        if(currentWayPoint !== null){
+            var distance = this.node.position.sub(currentWayPoint).mag();
+            if(distance < distanveToAcceptArrive){
+                // 认为到达了
+                currentWayPoint = PathNodeJS.goNextPoint();
+            }
+            if(PathNodeJS.isFinshed()){
+                return this.Arrive(PathNodeJS.getCurrentPoint());
+            }else{
+                return this.Seek(PathNodeJS.getCurrentPoint());
+            }
+        }else{
+            return cc.Vec2.ZERO;
+        }
+    }
 });

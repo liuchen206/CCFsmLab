@@ -35,6 +35,7 @@ cc.Class({
         Mass:1,
         rigidbody:cc.RigidBody,
         InstanceID:0,
+        currentPathNode:cc.Node,
     },
 
     // LIFE-CYCLE CALLBACKS:

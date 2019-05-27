@@ -242,6 +242,7 @@
       "__id__": 7
     },
     "InstanceID": 0,
+    "currentPathNode": null,
     "_id": ""
   },
   {
@@ -284,7 +285,7 @@
     "hunderPlayer": null,
     "beSeek": false,
     "beFlee": false,
-    "beArrive": true,
+    "beArrive": false,
     "bePursuit": false,
     "beEvade": false,
     "beWander": false,
@@ -292,6 +293,7 @@
     "beWallAvoidance": true,
     "beInterpose": false,
     "beHide": false,
+    "bePathFollow": true,
     "vSteeringForce": {
       "__type__": "cc.Vec2",
       "x": 0,

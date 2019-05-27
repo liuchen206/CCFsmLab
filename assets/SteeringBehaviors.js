@@ -32,6 +32,8 @@ cc.Class({
         interposePlayerA:cc.Node,
         interposePlayerB:cc.Node,
         hunderPlayer:cc.Node,
+        leaderTarget:cc.Node,
+        offsetToLeader:cc.Vec2.ZERO,
         beSeek:false,
         beFlee:false,
         beArrive:false,
@@ -43,6 +45,7 @@ cc.Class({
         beInterpose:false,
         beHide:false,
         bePathFollow:false,
+        beOffsetPursuit:false,
         vSteeringForce:cc.Vec2,
         elapseTime:0,
         hideMemoryCounter:0,
@@ -106,11 +109,14 @@ cc.Class({
         if(this.bePathFollow){
             this.vSteeringForce.addSelf(this.PathFollow(this.AutoPlayerJS.currentPathNode));
         }
+        if(this.beOffsetPursuit){
+            this.vSteeringForce.addSelf(this.OffsetPursuit(this.leaderTarget.getComponent('AutoPlayer')));
+        }
         return this.vSteeringForce;
     },
     Seek(targetPos){
         var desiredVelocity = (targetPos.sub(this.AutoPlayerJS.node.position)).normalize().mul(this.AutoPlayerJS.MaxSpeed);
-        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity).mul(5);
+        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity).mul(5); // .mul(5) 乘以一个倍数的原因是，为了是转向更加敏感，避免“绕大弯”的情况出现
     },
     Flee(targetPos){
         var desiredVelocity = (targetPos.sub(this.AutoPlayerJS.node.position)).normalize().mul(this.AutoPlayerJS.MaxSpeed);
@@ -157,7 +163,8 @@ cc.Class({
         var berlinY = noise.perlin2(-this.elapseTime,-this.elapseTime);  
         var randomForceX = MapNum(berlinX,-1,1,-this.AutoPlayerJS.MaxSpeed,this.AutoPlayerJS.MaxSpeed);
         var randomForceY = MapNum(berlinY,-1,1,-this.AutoPlayerJS.MaxSpeed,this.AutoPlayerJS.MaxSpeed);
-        return new cc.Vec2(randomForceX,randomForceY);
+        var streeingForce = new cc.Vec2(randomForceX,randomForceY);
+        return streeingForce.mul(3);
     },
     ObstacleAvoidance(){
         // 1, 检测是否探测到障碍物
@@ -441,5 +448,15 @@ cc.Class({
         }else{
             return cc.Vec2.ZERO;
         }
+    },
+    OffsetPursuit(leader){
+        // var offset = new cc.Vec2(0,-100);
+        var offset = this.offsetToLeader;
+        var pointInGlobal = leader.node.convertToWorldSpaceAR(offset);
+        var pointInCanvas = cc.find("Canvas").convertToNodeSpaceAR(pointInGlobal);
+
+        var toPursuer = pointInCanvas.sub(this.AutoPlayerJS.node.position);
+        var lookAhead = toPursuer.mag()/(this.AutoPlayerJS.MaxSpeed + leader.vVelocity.mag());
+        return this.Arrive(pointInCanvas.add(leader.vVelocity.mul(lookAhead)));
     }
 });

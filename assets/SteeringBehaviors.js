@@ -31,6 +31,7 @@ cc.Class({
         evadeTarget:cc.Node,
         interposePlayerA:cc.Node,
         interposePlayerB:cc.Node,
+        hunderPlayer:cc.Node,
         beSeek:false,
         beFlee:false,
         beArrive:false,
@@ -40,8 +41,10 @@ cc.Class({
         beObstacleAvoidance:false,
         beWallAvoidance:false,
         beInterpose:false,
+        beHide:false,
         vSteeringForce:cc.Vec2,
         elapseTime:0,
+        hideMemoryCounter:0,
         graphics:cc.Graphics,
         isShowDrawDebugGraphics:true,
     },
@@ -60,6 +63,11 @@ cc.Class({
 
     update (dt) {
         this.elapseTime += dt;
+        if(this.hideMemoryCounter <= 0){
+            this.hideMemoryCounter = 0;
+        }else{
+            this.hideMemoryCounter -= dt;
+        }
     },
     Calculate(){
         this.graphics.clear();
@@ -90,6 +98,9 @@ cc.Class({
         }
         if(this.beInterpose){
             this.vSteeringForce.addSelf(this.Interpose(this.interposePlayerB.getComponent('AutoPlayer'),this.interposePlayerA.getComponent('AutoPlayer')));
+        }
+        if(this.beHide){
+            this.vSteeringForce.addSelf(this.Hide(this.hunderPlayer.getComponent('AutoPlayer')));
         }
         return this.vSteeringForce;
     },
@@ -317,5 +328,96 @@ cc.Class({
         }
 
         return this.Arrive(futureMidPoint);
+    },
+    Hide(hunter){
+        // 1 首先要能“看到”hunter
+        var minDetectorLength = this.node.height;
+        var maxDetectorLength = this.node.height*2;
+        // var rectHeight = 300;
+        var rectHeight = minDetectorLength + maxDetectorLength;
+        var midStart = new cc.Vec2(0,0)
+        // 生成探针
+        // 中间
+        var midEnd = new cc.Vec2(0,rectHeight)
+        var mid0 = midEnd.sub(midStart);
+        // 左偏 30
+        var left30 = mid0.rotate(Math.PI/6);
+        // 左偏 60
+        var left60 = mid0.rotate(Math.PI/3);
+        // 右偏 30
+        var right30 = mid0.rotate(-Math.PI/6);
+        // 右偏 60
+        var right60 = mid0.rotate(-Math.PI/3);
+
+        var sensorList = [{data:left60,weight:3,derect:-1},{data:left30,weight:2,derect:-1},{data:mid0,weight:1,derect:0},{data:right30,weight:2,derect:1},{data:right60,weight:3,derect:1}];
+       
+        var isVisual = false;
+        // 逐个检测每个sensor
+        for(var i = 0;i < sensorList.length;i++){
+            var worldPosStart = this.node.convertToWorldSpaceAR(midStart);
+            var worldPosEnd = this.node.convertToWorldSpaceAR(sensorList[i]['data']);
+            var results = cc.director.getPhysicsManager().rayCast(worldPosStart, worldPosEnd, cc.RayCastType.All);
+            for (var j = 0; j < results.length; j++) {
+                var result = results[j];
+                var collider = result.collider;
+                var point = result.point;
+                var normal = result.normal;
+                var fraction = result.fraction;
+                if(collider.tag == EnumOfColliderTag.PlayerCollider){ //仅仅检测player
+                    //除了自己之外的player
+                    if(collider.node.getComponent("AutoPlayer").InstanceID !== this.AutoPlayerJS.InstanceID){
+                        if(collider.node.getComponent("AutoPlayer").InstanceID === hunter.InstanceID){
+                            // 探测到hunter
+                            isVisual = true;
+                            this.hideMemoryCounter = 7;
+                        }
+                        sensorList[i]['data'] = this.graphics.node.convertToNodeSpaceAR(point);
+                        // 绘制 辅助线(击中点)
+                        if(this.isShowDrawDebugGraphics){
+                            this.graphics.strokeColor = cc.Color.GREEN;
+                            this.graphics.circle(sensorList[i]['data'].x, sensorList[i]['data'].y, 8);
+                            if(isVisual){
+                                this.graphics.strokeColor = cc.Color.RED;
+                                this.graphics.circle(sensorList[i]['data'].x, sensorList[i]['data'].y, 8);
+                            }
+                          this.graphics.stroke();        
+                    }
+                        break;
+                    }
+                }
+            }
+        }
+        // 绘制 辅助线
+        if(this.isShowDrawDebugGraphics){
+            this.graphics.strokeColor = cc.Color.ORANGE;
+            for(var i = 0;i < sensorList.length;i++){
+                this.graphics.moveTo(0, 0);
+                this.graphics.lineTo(sensorList[i]['data'].x, sensorList[i]['data'].y);
+            }
+            this.graphics.stroke();        
+        }
+        // 2 其次是计算能够躲避的位置
+        var hidePositionList = this.AutoPlayerJS.GameWorldJS.getHidePosition(hunter);
+        var shortestDistance = 99999;
+        var shortestPoint = null;
+        for(var i = 0;i < hidePositionList.length;i++){
+            //在多个位置中选择一个最近的位置
+            var distance = hidePositionList[i].sub(this.AutoPlayerJS.node.position).mag();
+            if(distance < shortestDistance){
+                shortestDistance = distance;
+                shortestPoint =  hidePositionList[i];
+            }
+        }
+        // 3 最后是像躲避的位置移动
+        if(this.hideMemoryCounter > 0){
+            // "曾经见过hunter"
+            if(shortestPoint == null){
+                return this.Evade(hunter);
+            }else{
+                return this.Arrive(shortestPoint);
+            }
+        }else{
+            return cc.Vec2.ZERO;
+        }
     },
 });

@@ -34,6 +34,7 @@ cc.Class({
         MaxForce:200,
         Mass:1,
         rigidbody:cc.RigidBody,
+        InstanceID:0,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -41,6 +42,7 @@ cc.Class({
     onLoad () {
         this.GameWorldJS = cc.find("Canvas").getComponent('GameWorld');
         this.SteeringBehaviorsJS = this.node.getComponent('SteeringBehaviors');
+        this.InstanceID = PlayerInstanceIdManager.GetAnNewID();
     },
     TestCallBack: function(data){
         cc.log("data : ",data.data);
@@ -73,6 +75,8 @@ cc.Class({
         // //派发事件,第二个参数可以是需要传递的数据
         // EventCenter.dispatchEvent(EventCenter.EventType.TEST_EVENT);
         // EventCenter.dispatchEvent(EventCenter.EventType.TEST_EVENT,{'data':"2"});
+
+        // cc.log('PlayerInstanceIdManager',PlayerInstanceIdManager.GetAnNewID());
     },
 
     update (dt) {

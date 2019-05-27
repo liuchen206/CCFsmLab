@@ -79,3 +79,9 @@ window.EnumOfColliderTag = {
     ObstacleCollider: 2, // 障碍物碰撞器 tag
     wallCollider: 3, // 墙壁碰撞器 tag
 };
+window.PlayerInstanceIdManager = {
+    currentIDCounter: 0,
+    GetAnNewID: function(){
+        return window.PlayerInstanceIdManager.currentIDCounter++;
+    },
+};

@@ -63,8 +63,8 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": 26.062,
-      "y": -15.301,
+      "x": 79.975,
+      "y": -111.972,
       "z": 0
     },
     "_scale": {
@@ -235,8 +235,8 @@
       "x": 0,
       "y": 0
     },
-    "MaxSpeed": 300,
-    "MaxForce": 255,
+    "MaxSpeed": 200,
+    "MaxForce": 700,
     "Mass": 1,
     "rigidbody": {
       "__id__": 7
@@ -283,17 +283,27 @@
     "interposePlayerA": null,
     "interposePlayerB": null,
     "hunderPlayer": null,
+    "leaderTarget": null,
+    "offsetToLeader": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
     "beSeek": false,
     "beFlee": false,
     "beArrive": false,
     "bePursuit": false,
     "beEvade": false,
-    "beWander": false,
-    "beObstacleAvoidance": true,
-    "beWallAvoidance": true,
+    "beWander": true,
+    "beObstacleAvoidance": false,
+    "beWallAvoidance": false,
     "beInterpose": false,
     "beHide": false,
-    "bePathFollow": true,
+    "bePathFollow": false,
+    "beOffsetPursuit": false,
+    "beSeparation": true,
+    "beAlignment": true,
+    "beCohesion": true,
     "vSteeringForce": {
       "__type__": "cc.Vec2",
       "x": 0,
@@ -301,10 +311,16 @@
     },
     "elapseTime": 0,
     "hideMemoryCounter": 0,
+    "cohesionMemoryCounter": 0,
+    "cohesionCenterOfMass": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
     "graphics": {
       "__id__": 3
     },
-    "isShowDrawDebugGraphics": true,
+    "isShowDrawDebugGraphics": false,
     "_id": ""
   },
   {

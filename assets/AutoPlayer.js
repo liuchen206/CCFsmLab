@@ -114,12 +114,14 @@ cc.Class({
 
         // 计算朝向（向量）
         if(this.rigidbody.linearVelocity.mag() > 1){
-            this.vHeading = this.rigidbody.linearVelocity.normalize();
             // 计算朝向（角度）
-            var angle = cc.Vec2.UP.signAngle(this.vHeading);
+            var angle = cc.Vec2.UP.signAngle(this.rigidbody.linearVelocity.normalize());
             var degree = angle/Math.PI*180;
             this.node.angle = degree;
         }
+        var angle = this.node.angle*Math.PI/180;
+        this.vHeading =  cc.Vec2.UP.rotate(angle);
+
         this.wrapWinSize();
 
     },

@@ -55,8 +55,6 @@ cc.Class({
         vSteeringForce:cc.Vec2,
         elapseTime:0,
         hideMemoryCounter:0,
-        cohesionMemoryCounter:0,
-        cohesionCenterOfMass:cc.Vec2,
         graphics:cc.Graphics,
         isShowDrawDebugGraphics:true,
     },
@@ -102,6 +100,7 @@ cc.Class({
         if(this.beArrive){
             this.vSteeringForce.addSelf(this.Arrive(this.AutoPlayerJS.GameWorldJS.crossHair.position));
         }
+
         if(this.bePursuit){
             this.vSteeringForce.addSelf(this.Pursuit(this.pursuitTarget.getComponent('AutoPlayer')));
         }
@@ -504,86 +503,27 @@ cc.Class({
         return this.Arrive(pointInCanvas.add(leader.vVelocity.mul(lookAhead)));
     },
     Separation(){
-        // 1 首先要能“看到” 其他的player
+        // 首先要能“看到” 其他的player
         var minDetectorLength = this.node.height;
         var maxDetectorLength = this.node.height*4;
         // var rectHeight = 300;
         var rectHeight = minDetectorLength + maxDetectorLength;
-        var midStart = new cc.Vec2(0,0)
-        // 生成探针
-        // 中间
-        var midEnd = new cc.Vec2(0,rectHeight)
-        var mid0 = midEnd.sub(midStart);
-        // 左偏 15
-        var left15 = mid0.rotate(Math.PI/12);
-        // 左偏 30
-        var left30 = mid0.rotate(Math.PI/6);
-        // 左偏 45
-        var left45 = mid0.rotate(Math.PI/4);
-        // 左偏 60
-        var left60 = mid0.rotate(Math.PI/3);
-        // 右偏 15
-        var right15 = mid0.rotate(-Math.PI/12);
-        // 右偏 30
-        var right30 = mid0.rotate(-Math.PI/6);
-        // 右偏 45
-        var right45 = mid0.rotate(-Math.PI/4);
-        // 右偏 60
-        var right60 = mid0.rotate(-Math.PI/3);
 
-        var sensorList = [
-            {data:left60,weight:5,derect:-1},
-            {data:left45,weight:4,derect:-1},
-            {data:left30,weight:3,derect:-1},
-            {data:left15,weight:2,derect:-1},
-            {data:mid0,weight:1,derect:0},
-            {data:right15,weight:2,derect:1},
-            {data:right30,weight:3,derect:1},
-            {data:right45,weight:4,derect:1},
-            {data:right60,weight:5,derect:1},
-        ];
-
+        var playerList = this.AutoPlayerJS.GameWorldJS.getPlayerList(this.AutoPlayerJS,rectHeight)
         var streeingForce = cc.Vec2.ZERO;
-        // 逐个检测每个sensor
-        for(var i = 0;i < sensorList.length;i++){
-            var worldPosStart = this.node.convertToWorldSpaceAR(midStart);
-            var worldPosEnd = this.node.convertToWorldSpaceAR(sensorList[i]['data']);
-            var results = cc.director.getPhysicsManager().rayCast(worldPosStart, worldPosEnd, cc.RayCastType.All);
-            for (var j = 0; j < results.length; j++) {
-                var result = results[j];
-                var collider = result.collider;
-                var point = result.point;
-                var normal = result.normal;
-                var fraction = result.fraction;
-                if(collider.tag == EnumOfColliderTag.PlayerCollider){ //仅仅检测player
-                    //除了自己之外的player
-                    if(collider.node.getComponent("AutoPlayer").InstanceID !== this.AutoPlayerJS.InstanceID){
-                        sensorList[i]['data'] = this.graphics.node.convertToNodeSpaceAR(point);
-                        // 绘制 辅助线(击中点)
-                        if(this.isShowDrawDebugGraphics){
-                            this.graphics.strokeColor = cc.Color.GREEN;
-                            this.graphics.circle(sensorList[i]['data'].x, sensorList[i]['data'].y, 8);
-                            this.graphics.stroke();        
-                        }
-                        var directToSeparate = this.AutoPlayerJS.node.position.sub(collider.node.position);
-                        streeingForce.addSelf(directToSeparate.normalize().mul(directToSeparate.mag()));
-                        break;
-                    }
-                }
-            }
+        for(var i = 0;i < playerList.length;i++){
+            var directToSeparate = this.AutoPlayerJS.node.position.sub(playerList[i].position);
+            streeingForce.addSelf(directToSeparate.normalize().div(directToSeparate.mag()));
         }
-       
-        // 绘制 辅助线
+        
+        // 绘制 辅助线(击中点)
         if(this.isShowDrawDebugGraphics){
-            this.graphics.strokeColor = cc.Color.ORANGE;
-            for(var i = 0;i < sensorList.length;i++){
-                this.graphics.moveTo(0, 0);
-                this.graphics.lineTo(sensorList[i]['data'].x, sensorList[i]['data'].y);
-            }
+            this.graphics.strokeColor = cc.Color.GREEN;
+            this.graphics.circle(0,0, rectHeight);
             this.graphics.stroke();        
         }
-
-        return streeingForce;
+        var desiredVelocity = streeingForce.normalize().mul(this.AutoPlayerJS.MaxSpeed);
+        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity).mul(5);
     },
     Alignment(){
         // 1 首先要能“看到” 其他的player
@@ -591,87 +531,28 @@ cc.Class({
         var maxDetectorLength = this.node.height*4;
         // var rectHeight = 300;
         var rectHeight = minDetectorLength + maxDetectorLength;
-        var midStart = new cc.Vec2(0,0)
-        // 生成探针
-        // 中间
-        var midEnd = new cc.Vec2(0,rectHeight)
-        var mid0 = midEnd.sub(midStart);
-        // 左偏 15
-        var left15 = mid0.rotate(Math.PI/12);
-        // 左偏 30
-        var left30 = mid0.rotate(Math.PI/6);
-        // 左偏 45
-        var left45 = mid0.rotate(Math.PI/4);
-        // 左偏 60
-        var left60 = mid0.rotate(Math.PI/3);
-        // 右偏 15
-        var right15 = mid0.rotate(-Math.PI/12);
-        // 右偏 30
-        var right30 = mid0.rotate(-Math.PI/6);
-        // 右偏 45
-        var right45 = mid0.rotate(-Math.PI/4);
-        // 右偏 60
-        var right60 = mid0.rotate(-Math.PI/3);
 
-        var sensorList = [
-            {data:left60,weight:5,derect:-1},
-            {data:left45,weight:4,derect:-1},
-            {data:left30,weight:3,derect:-1},
-            {data:left15,weight:2,derect:-1},
-            {data:mid0,weight:1,derect:0},
-            {data:right15,weight:2,derect:1},
-            {data:right30,weight:3,derect:1},
-            {data:right45,weight:4,derect:1},
-            {data:right60,weight:5,derect:1},
-        ];
-
-        var streeingForce = cc.Vec2.ZERO;
+        
         var neighborCounter = 0;
         var AverageHeading = cc.Vec2.ZERO;
-        // 逐个检测每个sensor
-        for(var i = 0;i < sensorList.length;i++){
-            var worldPosStart = this.node.convertToWorldSpaceAR(midStart);
-            var worldPosEnd = this.node.convertToWorldSpaceAR(sensorList[i]['data']);
-            var results = cc.director.getPhysicsManager().rayCast(worldPosStart, worldPosEnd, cc.RayCastType.All);
-            for (var j = 0; j < results.length; j++) {
-                var result = results[j];
-                var collider = result.collider;
-                var point = result.point;
-                var normal = result.normal;
-                var fraction = result.fraction;
-                if(collider.tag == EnumOfColliderTag.PlayerCollider){ //仅仅检测player
-                    //除了自己之外的player
-                    if(collider.node.getComponent("AutoPlayer").InstanceID !== this.AutoPlayerJS.InstanceID){
-                        sensorList[i]['data'] = this.graphics.node.convertToNodeSpaceAR(point);
-                        // 绘制 辅助线(击中点)
-                        if(this.isShowDrawDebugGraphics){
-                            this.graphics.strokeColor = cc.Color.GREEN;
-                            this.graphics.circle(sensorList[i]['data'].x, sensorList[i]['data'].y, 8);
-                            this.graphics.stroke();        
-                        }
-                        neighborCounter++;
-                        AverageHeading.addSelf(collider.node.getComponent("AutoPlayer").vHeading);
-                        break;
-                    }
-                }
-            }
+        var playerList = this.AutoPlayerJS.GameWorldJS.getPlayerList(this.AutoPlayerJS,rectHeight)
+        var streeingForce = cc.Vec2.ZERO;
+        for(var i = 0;i < playerList.length;i++){
+            neighborCounter++;
+            AverageHeading.addSelf(playerList[i].getComponent("AutoPlayer").vHeading);
         }
         if(neighborCounter > 0){
             AverageHeading = AverageHeading.div(neighborCounter);
             streeingForce = AverageHeading.sub(this.AutoPlayerJS.vHeading);
         }
-       
-        // 绘制 辅助线
+        // 绘制 辅助线(击中点)
         if(this.isShowDrawDebugGraphics){
-            this.graphics.strokeColor = cc.Color.ORANGE;
-            for(var i = 0;i < sensorList.length;i++){
-                this.graphics.moveTo(0, 0);
-                this.graphics.lineTo(sensorList[i]['data'].x, sensorList[i]['data'].y);
-            }
+            this.graphics.strokeColor = cc.Color.GREEN;
+            this.graphics.circle(0,0, rectHeight);
             this.graphics.stroke();        
         }
-
-        return streeingForce; 
+        var desiredVelocity = streeingForce.normalize().mul(this.AutoPlayerJS.MaxSpeed);
+        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity).mul(5);
     },
     Cohesion(){
        // 1 首先要能“看到” 其他的player
@@ -679,93 +560,25 @@ cc.Class({
        var maxDetectorLength = this.node.height*4;
        // var rectHeight = 300;
        var rectHeight = minDetectorLength + maxDetectorLength;
-       var midStart = new cc.Vec2(0,0)
-       // 生成探针
-       // 中间
-       var midEnd = new cc.Vec2(0,rectHeight)
-       var mid0 = midEnd.sub(midStart);
-       // 左偏 15
-       var left15 = mid0.rotate(Math.PI/12);
-       // 左偏 30
-       var left30 = mid0.rotate(Math.PI/6);
-       // 左偏 45
-       var left45 = mid0.rotate(Math.PI/4);
-       // 左偏 60
-       var left60 = mid0.rotate(Math.PI/3);
-       // 右偏 15
-       var right15 = mid0.rotate(-Math.PI/12);
-       // 右偏 30
-       var right30 = mid0.rotate(-Math.PI/6);
-       // 右偏 45
-       var right45 = mid0.rotate(-Math.PI/4);
-       // 右偏 60
-       var right60 = mid0.rotate(-Math.PI/3);
 
-       var sensorList = [
-           {data:left60,weight:5,derect:-1},
-           {data:left45,weight:4,derect:-1},
-           {data:left30,weight:3,derect:-1},
-           {data:left15,weight:2,derect:-1},
-           {data:mid0,weight:1,derect:0},
-           {data:right15,weight:2,derect:1},
-           {data:right30,weight:3,derect:1},
-           {data:right45,weight:4,derect:1},
-           {data:right60,weight:5,derect:1},
-       ];
-
+       var playerList = this.AutoPlayerJS.GameWorldJS.getPlayerList(this.AutoPlayerJS,rectHeight)
        var streeingForce = cc.Vec2.ZERO;
        var neighborCounter = 0;
        var CenterOfMass = cc.Vec2.ZERO;
-       // 逐个检测每个sensor
-       for(var i = 0;i < sensorList.length;i++){
-           var worldPosStart = this.node.convertToWorldSpaceAR(midStart);
-           var worldPosEnd = this.node.convertToWorldSpaceAR(sensorList[i]['data']);
-           var results = cc.director.getPhysicsManager().rayCast(worldPosStart, worldPosEnd, cc.RayCastType.All);
-           for (var j = 0; j < results.length; j++) {
-               var result = results[j];
-               var collider = result.collider;
-               var point = result.point;
-               var normal = result.normal;
-               var fraction = result.fraction;
-               if(collider.tag == EnumOfColliderTag.PlayerCollider){ //仅仅检测player
-                   //除了自己之外的player
-                   if(collider.node.getComponent("AutoPlayer").InstanceID !== this.AutoPlayerJS.InstanceID){
-                       sensorList[i]['data'] = this.graphics.node.convertToNodeSpaceAR(point);
-                       // 绘制 辅助线(击中点)
-                       if(this.isShowDrawDebugGraphics){
-                           this.graphics.strokeColor = cc.Color.GREEN;
-                           this.graphics.circle(sensorList[i]['data'].x, sensorList[i]['data'].y, 8);
-                           this.graphics.stroke();        
-                       }
-                       neighborCounter++;
-                       CenterOfMass.addSelf(collider.node.position);
-                       break;
-                   }
-               }
-           }
+       for(var i = 0;i < playerList.length;i++){
+            neighborCounter++;
+            CenterOfMass.addSelf(playerList[i].position);
        }
         if(neighborCounter > 0){
-            CenterOfMass.div(neighborCounter);
-            this.cohesionCenterOfMass = CenterOfMass;
-            this.cohesionMemoryCounter = 7;
-            streeingForce = this.Seek(this.cohesionCenterOfMass);
-        }else{
-            if(this.cohesionMemoryCounter > 0){
-                // 向“记得的”向群落中聚集
-                streeingForce = this.Seek(this.cohesionCenterOfMass);
-            }
+            CenterOfMass.divSelf(neighborCounter);
+            streeingForce = this.Seek(CenterOfMass);
         }
-      
-       // 绘制 辅助线
+       // 绘制 辅助线(击中点)
        if(this.isShowDrawDebugGraphics){
-           this.graphics.strokeColor = cc.Color.ORANGE;
-           for(var i = 0;i < sensorList.length;i++){
-               this.graphics.moveTo(0, 0);
-               this.graphics.lineTo(sensorList[i]['data'].x, sensorList[i]['data'].y);
-           }
+           this.graphics.strokeColor = cc.Color.GREEN;
+           this.graphics.circle(0,0, rectHeight);
            this.graphics.stroke();        
        }
-
-       return streeingForce; 
+       return streeingForce;
     },
 });

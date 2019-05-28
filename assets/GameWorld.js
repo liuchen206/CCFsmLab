@@ -122,6 +122,21 @@ cc.Class({
         }
         return obstacleList;
     },
+    // 获得半径内的所有出自己外的 player
+    getPlayerList(searchPlayerNodeJS,radio){
+        var allNodeInCanvas = this.node.children;
+        var playerList = [];
+        for(var i = 0;i < allNodeInCanvas.length;i++){
+            if(allNodeInCanvas[i].getComponent('AutoPlayer') !== null){
+                if(allNodeInCanvas[i].getComponent('AutoPlayer').InstanceID !== searchPlayerNodeJS.InstanceID){
+                    if(allNodeInCanvas[i].position.sub(searchPlayerNodeJS.node.position).mag()<=radio){
+                        playerList.push(allNodeInCanvas[i]);
+                    }
+                }
+            }
+        }
+        return playerList;
+    },
     // 从UI界面上权重配置 设置回调函数
     weightSetDone(editbox,returnData){
         cc.log('weightSetDone',returnData,editbox.string,parseFloat(editbox.string));

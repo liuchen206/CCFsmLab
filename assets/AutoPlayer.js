@@ -105,12 +105,17 @@ cc.Class({
         // 施加力，使其移动
         // this.rigidbody.applyForceToCenter(steeringForce);
 
-        // var posInGraphics = this.SteeringBehaviorsJS.graphics.node.convertToNodeSpaceAR(this.node.parent.convertToWorldSpaceAR(steeringForce));
-        // this.SteeringBehaviorsJS.graphics.clear();
-        // this.SteeringBehaviorsJS.graphics.strokeColor = cc.Color.GREEN;
-        // this.SteeringBehaviorsJS.graphics.moveTo(0, 0);
-        // this.SteeringBehaviorsJS.graphics.lineTo(posInGraphics.x,posInGraphics.y);
-        // this.SteeringBehaviorsJS.graphics.stroke();
+        // 绘制当前的施加力的向量
+        if(this.SteeringBehaviorsJS.isShowDrawDebugGraphics){
+            var posInCancas = this.SteeringBehaviorsJS.node.position.add(steeringForce);
+            var posInWorld = this.node.parent.convertToWorldSpaceAR(posInCancas);
+            var posInNode = this.SteeringBehaviorsJS.graphics.node.convertToNodeSpaceAR(posInWorld);
+            var posInGraphics = posInNode;
+            this.SteeringBehaviorsJS.graphics.strokeColor = cc.Color.GREEN;
+            this.SteeringBehaviorsJS.graphics.moveTo(0, 0);
+            this.SteeringBehaviorsJS.graphics.lineTo(posInGraphics.x,posInGraphics.y);
+            this.SteeringBehaviorsJS.graphics.stroke();
+        }
 
         // 计算朝向（向量）
         if(this.rigidbody.linearVelocity.mag() > 1){

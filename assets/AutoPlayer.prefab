@@ -63,8 +63,8 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": 79.975,
-      "y": -111.972,
+      "x": 10.978,
+      "y": -85.626,
       "z": 0
     },
     "_scale": {
@@ -304,6 +304,9 @@
     "beSeparation": true,
     "beAlignment": true,
     "beCohesion": true,
+    "weightSeparation": 1,
+    "weightAlignment": 1,
+    "weightCohesion": 1,
     "vSteeringForce": {
       "__type__": "cc.Vec2",
       "x": 0,
@@ -311,16 +314,10 @@
     },
     "elapseTime": 0,
     "hideMemoryCounter": 0,
-    "cohesionMemoryCounter": 0,
-    "cohesionCenterOfMass": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
-    },
     "graphics": {
       "__id__": 3
     },
-    "isShowDrawDebugGraphics": false,
+    "isShowDrawDebugGraphics": true,
     "_id": ""
   },
   {

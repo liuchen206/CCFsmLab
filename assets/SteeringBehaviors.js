@@ -49,6 +49,9 @@ cc.Class({
         beSeparation:false,
         beAlignment:false,
         beCohesion:false,
+        weightSeparation:1,
+        weightAlignment:1,
+        weightCohesion:1,
         vSteeringForce:cc.Vec2,
         elapseTime:0,
         hideMemoryCounter:0,
@@ -68,6 +71,7 @@ cc.Class({
         // cc.log('MapNum：：',MapNum(0,-50,50,0,100));
 
         noise.seed(Math.random());
+        // cc.log("Math.random(),",Math.random());
     },
 
     update (dt) {
@@ -82,6 +86,9 @@ cc.Class({
         }else{
             this.cohesionMemoryCounter -= dt;
         }
+        this.weightSeparation = this.AutoPlayerJS.GameWorldJS.globalWeightSeparation;
+        this.weightAlignment = this.AutoPlayerJS.GameWorldJS.globalWeightAlignment;
+        this.weightCohesion = this.AutoPlayerJS.GameWorldJS.globalWeightCohesion;
     },
     Calculate(){
         this.graphics.clear();
@@ -123,13 +130,13 @@ cc.Class({
             this.vSteeringForce.addSelf(this.OffsetPursuit(this.leaderTarget.getComponent('AutoPlayer')));
         }
         if(this.beSeparation){
-            this.vSteeringForce.addSelf(this.Separation());
+            this.vSteeringForce.addSelf(this.Separation().mul(this.weightSeparation));
         }
         if(this.beAlignment){
-            this.vSteeringForce.addSelf(this.Alignment());
+            this.vSteeringForce.addSelf(this.Alignment().mul(this.weightAlignment));
         }
         if(this.beCohesion){
-            this.vSteeringForce.addSelf(this.Cohesion());
+            this.vSteeringForce.addSelf(this.Cohesion().mul(this.weightCohesion));
         }
         return this.vSteeringForce;
     },
@@ -179,11 +186,11 @@ cc.Class({
     },
     Wander(){
         var berlinX = noise.perlin2(this.elapseTime,this.elapseTime);  
-        var berlinY = noise.perlin2(-this.elapseTime,-this.elapseTime);  
+        var berlinY = noise.perlin2(this.elapseTime+10000,this.elapseTime+10000);  
         var randomForceX = MapNum(berlinX,-1,1,-this.AutoPlayerJS.MaxSpeed,this.AutoPlayerJS.MaxSpeed);
         var randomForceY = MapNum(berlinY,-1,1,-this.AutoPlayerJS.MaxSpeed,this.AutoPlayerJS.MaxSpeed);
         var streeingForce = new cc.Vec2(randomForceX,randomForceY);
-        return streeingForce.mul(3);
+        return streeingForce.mul(2); 
     },
     ObstacleAvoidance(){
         // 1, 检测是否探测到障碍物
@@ -744,7 +751,7 @@ cc.Class({
             streeingForce = this.Seek(this.cohesionCenterOfMass);
         }else{
             if(this.cohesionMemoryCounter > 0){
-                // 曾经“记得”向群落中聚集
+                // 向“记得的”向群落中聚集
                 streeingForce = this.Seek(this.cohesionCenterOfMass);
             }
         }

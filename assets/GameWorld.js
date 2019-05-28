@@ -32,6 +32,12 @@ cc.Class({
         },
         graphics:cc.Graphics,
         isShowDrawDebugGraphicsInWorld: false,
+        globalWeightSeparation:1,
+        globalWeightAlignment:1,
+        globalWeightCohesion:1,
+        separationEditBox:cc.EditBox,
+        AlignmentEditBox:cc.EditBox,
+        CohesionEditBox:cc.EditBox,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -67,7 +73,9 @@ cc.Class({
     },
 
     start () {
-
+        this.separationEditBox.string = this.globalWeightSeparation.toString();
+        this.AlignmentEditBox.string = this.globalWeightAlignment.toString();
+        this.CohesionEditBox.string = this.globalWeightCohesion.toString();
     },
 
     // update (dt) {},
@@ -113,5 +121,18 @@ cc.Class({
             }
         }
         return obstacleList;
+    },
+    // 从UI界面上权重配置 设置回调函数
+    weightSetDone(editbox,returnData){
+        cc.log('weightSetDone',returnData,editbox.string,parseFloat(editbox.string));
+        if(returnData == "Separation"){
+            this.globalWeightSeparation = parseFloat(editbox.string);
+        }
+        if(returnData == "Alignment"){
+            this.globalWeightAlignment = parseFloat(editbox.string);
+        }
+        if(returnData == "Cohesion "){
+            this.globalWeightCohesion = parseFloat(editbox.string);
+        }
     }
 });

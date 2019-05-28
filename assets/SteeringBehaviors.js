@@ -141,12 +141,12 @@ cc.Class({
     },
     Seek(targetPos){
         var desiredVelocity = (targetPos.sub(this.AutoPlayerJS.node.position)).normalize().mul(this.AutoPlayerJS.MaxSpeed);
-        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity).mul(5); // .mul(5) 乘以一个倍数的原因是，为了是转向更加敏感，避免“绕大弯”的情况出现
+        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity).mul(2); // .mul(5) 乘以一个倍数的原因是，为了是转向更加敏感，避免“绕大弯”的情况出现
     },
     Flee(targetPos){
         var desiredVelocity = (targetPos.sub(this.AutoPlayerJS.node.position)).normalize().mul(this.AutoPlayerJS.MaxSpeed);
         desiredVelocity.negSelf();
-        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity).mul(5);
+        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
     },
     Arrive(targetPos){
         var toTargetVec2 = targetPos.sub(this.AutoPlayerJS.node.position);
@@ -186,10 +186,10 @@ cc.Class({
     Wander(){
         var berlinX = noise.perlin2(this.elapseTime,this.elapseTime);  
         var berlinY = noise.perlin2(this.elapseTime+10000,this.elapseTime+10000);  
-        var randomForceX = MapNum(berlinX,-1,1,-this.AutoPlayerJS.MaxSpeed,this.AutoPlayerJS.MaxSpeed);
-        var randomForceY = MapNum(berlinY,-1,1,-this.AutoPlayerJS.MaxSpeed,this.AutoPlayerJS.MaxSpeed);
+        var randomForceX = MapNum(berlinX,-1,1,-this.AutoPlayerJS.MaxSpeed*3,this.AutoPlayerJS.MaxSpeed*3);
+        var randomForceY = MapNum(berlinY,-1,1,-this.AutoPlayerJS.MaxSpeed*3,this.AutoPlayerJS.MaxSpeed*3);
         var streeingForce = new cc.Vec2(randomForceX,randomForceY);
-        return streeingForce.mul(2); 
+        return streeingForce; 
     },
     ObstacleAvoidance(){
         // 1, 检测是否探测到障碍物
@@ -523,7 +523,7 @@ cc.Class({
             this.graphics.stroke();        
         }
         var desiredVelocity = streeingForce.normalize().mul(this.AutoPlayerJS.MaxSpeed);
-        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity).mul(5);
+        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
     },
     Alignment(){
         // 1 首先要能“看到” 其他的player
@@ -552,7 +552,7 @@ cc.Class({
             this.graphics.stroke();        
         }
         var desiredVelocity = streeingForce.normalize().mul(this.AutoPlayerJS.MaxSpeed);
-        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity).mul(5);
+        return desiredVelocity.sub(this.AutoPlayerJS.vVelocity);
     },
     Cohesion(){
        // 1 首先要能“看到” 其他的player

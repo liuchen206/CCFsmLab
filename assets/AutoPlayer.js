@@ -32,6 +32,7 @@ cc.Class({
         vHeading:cc.Vec2,
         MaxSpeed:200,
         MaxForce:200,
+        MaxTurnRate:10,
         Mass:1,
         rigidbody:cc.RigidBody,
         InstanceID:0,
@@ -116,11 +117,14 @@ cc.Class({
             this.SteeringBehaviorsJS.graphics.lineTo(posInGraphics.x,posInGraphics.y);
             this.SteeringBehaviorsJS.graphics.stroke();
         }
-
         // 计算朝向（向量）
         if(this.rigidbody.linearVelocity.mag() > 1){
             // 计算朝向（角度）
-            var angle = cc.Vec2.UP.signAngle(this.rigidbody.linearVelocity.normalize());
+            var angle = this.node.angle*Math.PI/180;
+            var currentVHeading =  cc.Vec2.UP.rotate(angle);
+            var targetVHeading = this.rigidbody.linearVelocity.normalize();
+            var headingThisMoment = currentVHeading.lerp(targetVHeading,dt*this.MaxTurnRate);
+            var angle = cc.Vec2.UP.signAngle(headingThisMoment);
             var degree = angle/Math.PI*180;
             this.node.angle = degree;
         }

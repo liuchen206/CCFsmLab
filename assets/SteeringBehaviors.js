@@ -571,7 +571,9 @@ cc.Class({
        }
         if(neighborCounter > 0){
             CenterOfMass.divSelf(neighborCounter);
-            streeingForce = this.Seek(CenterOfMass);
+            var lengthToCenterMass = CenterOfMass.sub(this.AutoPlayerJS.node.position).mag();
+            var ratio = lengthToCenterMass/rectHeight; // 里质心点近就不需要那么大合力，离得远施加的力就大
+            streeingForce = this.Seek(CenterOfMass).mul(ratio);
         }
        // 绘制 辅助线(击中点)
        if(this.isShowDrawDebugGraphics){

@@ -1032,29 +1032,33 @@
     "evadeTarget": {
       "__id__": 5
     },
-    "interposePlayerA": null,
+    "interposePlayerA": {
+      "__id__": 5
+    },
     "interposePlayerB": null,
     "hunderPlayer": {
       "__id__": 5
     },
-    "leaderTarget": null,
+    "leaderTarget": {
+      "__id__": 5
+    },
     "offsetToLeader": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": 0
+      "y": -50
     },
     "beSeek": false,
     "beFlee": false,
     "beArrive": false,
     "bePursuit": false,
     "beEvade": false,
-    "beWander": true,
+    "beWander": false,
     "beObstacleAvoidance": true,
     "beWallAvoidance": true,
-    "beInterpose": true,
+    "beInterpose": false,
     "beHide": false,
     "bePathFollow": false,
-    "beOffsetPursuit": false,
+    "beOffsetPursuit": true,
     "beSeparation": false,
     "beAlignment": false,
     "beCohesion": false,

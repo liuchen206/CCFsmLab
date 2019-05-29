@@ -35,9 +35,25 @@ cc.Class({
         globalWeightSeparation:1,
         globalWeightAlignment:1,
         globalWeightCohesion:1,
+        globalWeightArrive:1,
+        globalWeigthPurSuit:1,
+        globalWeightEvade:1,
+        globalWeightWander:1,
+        globalWeightInterpose:1,
+        globalWeightHide:1,
+        globalWeightPathFollow:1,
+        globalWeightOffetPursuit:1,
         separationEditBox:cc.EditBox,
         AlignmentEditBox:cc.EditBox,
         CohesionEditBox:cc.EditBox,
+        ArriveEditBox:cc.EditBox,
+        PursuitEditBox:cc.EditBox,
+        EvadeEditBox:cc.EditBox,
+        WanderEditBox:cc.EditBox,
+        InterposeEditBox:cc.EditBox,
+        HideEditBox:cc.EditBox,
+        PathFollowEditBox:cc.EditBox,
+        OffetPursuitEditBox:cc.EditBox,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -76,6 +92,14 @@ cc.Class({
         this.separationEditBox.string = this.globalWeightSeparation.toString();
         this.AlignmentEditBox.string = this.globalWeightAlignment.toString();
         this.CohesionEditBox.string = this.globalWeightCohesion.toString();
+        this.ArriveEditBox.string = this.globalWeightArrive.toString();
+        this.PursuitEditBox.string = this.globalWeigthPurSuit.toString();
+        this.EvadeEditBox.string = this.globalWeightEvade.toString();
+        this.WanderEditBox.string = this.globalWeightWander.toString();
+        this.InterposeEditBox.string = this.globalWeightInterpose.toString();
+        this.HideEditBox.string = this.globalWeightHide.toString();
+        this.PathFollowEditBox.string = this.globalWeightPathFollow.toString();
+        this.OffetPursuitEditBox.string = this.globalWeightOffetPursuit.toString();
     },
 
     // update (dt) {},
@@ -148,6 +172,30 @@ cc.Class({
         }
         if(returnData == "Cohesion "){
             this.globalWeightCohesion = parseFloat(editbox.string);
+        }
+        if(returnData == "Arrive"){
+            this.globalWeightArrive = parseFloat(editbox.string);
+        }
+        if(returnData == "PurSuit"){
+            this.globalWeigthPurSuit = parseFloat(editbox.string);
+        }
+        if(returnData == "Evade"){
+            this.globalWeightEvade = parseFloat(editbox.string);
+        }
+        if(returnData == "Wander"){
+            this.globalWeightWander = parseFloat(editbox.string);
+        }
+        if(returnData == "Interpose"){
+            this.globalWeightInterpose = parseFloat(editbox.string);
+        }
+        if(returnData == "Hide"){
+            this.globalWeightHide = parseFloat(editbox.string);
+        }
+        if(returnData == "PathFollow"){
+            this.globalWeightPathFollow = parseFloat(editbox.string);
+        }
+        if(returnData == "OffetPursuit"){
+            this.globalWeightOffetPursuit = parseFloat(editbox.string);
         }
     }
 });

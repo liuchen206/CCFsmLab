@@ -52,6 +52,14 @@ cc.Class({
         weightSeparation:1,
         weightAlignment:1,
         weightCohesion:1,
+        weightArrive:1,
+        weigthPurSuit:1,
+        weightEvade:1,
+        weightWander:1,
+        weightInterpose:1,
+        weightHide:1,
+        weightPathFollow:1,
+        weightOffetPursuit:1,
         vSteeringForce:cc.Vec2,
         elapseTime:0,
         hideMemoryCounter:0,
@@ -87,57 +95,82 @@ cc.Class({
         this.weightSeparation = this.AutoPlayerJS.GameWorldJS.globalWeightSeparation;
         this.weightAlignment = this.AutoPlayerJS.GameWorldJS.globalWeightAlignment;
         this.weightCohesion = this.AutoPlayerJS.GameWorldJS.globalWeightCohesion;
+        this.weightArrive = this.AutoPlayerJS.GameWorldJS.globalWeightArrive;
+        this.weigthPurSuit = this.AutoPlayerJS.GameWorldJS.globalWeigthPurSuit;
+        this.weightEvade = this.AutoPlayerJS.GameWorldJS.globalWeightEvade;
+        this.weightWander = this.AutoPlayerJS.GameWorldJS.globalWeightWander;
+        this.weightInterpose = this.AutoPlayerJS.GameWorldJS.globalWeightInterpose;
+        this.weightHide = this.AutoPlayerJS.GameWorldJS.globalWeightHide;
+        this.weightPathFollow = this.AutoPlayerJS.GameWorldJS.globalWeightPathFollow;
+        this.weightOffetPursuit = this.AutoPlayerJS.GameWorldJS.globalWeightOffetPursuit;
     },
     Calculate(){
         this.graphics.clear();
         this.vSteeringForce = cc.Vec2.ZERO;
-        if(this.beSeek){
-            this.vSteeringForce.addSelf(this.Seek(this.AutoPlayerJS.GameWorldJS.crossHair.position));
-        }
-        if(this.beFlee){
-            this.vSteeringForce.addSelf(this.Flee(this.AutoPlayerJS.GameWorldJS.crossHair.position));
-        }
-        if(this.beArrive){
-            this.vSteeringForce.addSelf(this.Arrive(this.AutoPlayerJS.GameWorldJS.crossHair.position));
-        }
-
-        if(this.bePursuit){
-            this.vSteeringForce.addSelf(this.Pursuit(this.pursuitTarget.getComponent('AutoPlayer')));
-        }
-        if(this.beEvade){
-            this.vSteeringForce.addSelf(this.Evade(this.evadeTarget.getComponent('AutoPlayer')));
-        }
-        if(this.beWander){
-            this.vSteeringForce.addSelf(this.Wander());
+        if(this.beWallAvoidance){
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.WallAvoidance());
         }
         if(this.beObstacleAvoidance){
-            this.vSteeringForce.addSelf(this.ObstacleAvoidance());
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.ObstacleAvoidance());
         }
-        if(this.beWallAvoidance){
-            this.vSteeringForce.addSelf(this.WallAvoidance());
+        if(this.beEvade){
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.Evade(this.evadeTarget.getComponent('AutoPlayer')).mul(this.weightEvade));
         }
-        if(this.beInterpose){
-            this.vSteeringForce.addSelf(this.Interpose(this.interposePlayerB.getComponent('AutoPlayer'),this.interposePlayerA.getComponent('AutoPlayer')));
-        }
-        if(this.beHide){
-            this.vSteeringForce.addSelf(this.Hide(this.hunderPlayer.getComponent('AutoPlayer')));
-        }
-        if(this.bePathFollow){
-            this.vSteeringForce.addSelf(this.PathFollow(this.AutoPlayerJS.currentPathNode));
-        }
-        if(this.beOffsetPursuit){
-            this.vSteeringForce.addSelf(this.OffsetPursuit(this.leaderTarget.getComponent('AutoPlayer')));
+        if(this.beFlee){
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.Flee(this.AutoPlayerJS.GameWorldJS.crossHair.position));
         }
         if(this.beSeparation){
-            this.vSteeringForce.addSelf(this.Separation().mul(this.weightSeparation));
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.Separation().mul(this.weightSeparation));
         }
         if(this.beAlignment){
-            this.vSteeringForce.addSelf(this.Alignment().mul(this.weightAlignment));
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.Alignment().mul(this.weightAlignment));
         }
         if(this.beCohesion){
-            this.vSteeringForce.addSelf(this.Cohesion().mul(this.weightCohesion));
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.Cohesion().mul(this.weightCohesion));
         }
+        if(this.beSeek){
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.Seek(this.AutoPlayerJS.GameWorldJS.crossHair.position));
+        }
+        if(this.beArrive){
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.Arrive(this.AutoPlayerJS.GameWorldJS.crossHair.position).mul(this.weightArrive));
+        }
+        if(this.beWander){
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.Wander().mul(this.weightWander));
+        }
+        if(this.bePursuit){
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.Pursuit(this.pursuitTarget.getComponent('AutoPlayer')).mul(this.weigthPurSuit));
+        }
+        if(this.beOffsetPursuit){
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.OffsetPursuit(this.leaderTarget.getComponent('AutoPlayer')).mul(this.weightOffetPursuit));
+        }
+        if(this.beInterpose){
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.Interpose(this.interposePlayerB.getComponent('AutoPlayer'),this.interposePlayerA.getComponent('AutoPlayer')).mul(this.weightInterpose));
+        }
+        if(this.beHide){
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.Hide(this.hunderPlayer.getComponent('AutoPlayer')).mul(this.weightHide));
+        }
+        if(this.bePathFollow){
+            this.vSteeringForce = this.AccumulateForce(this.vSteeringForce, this.PathFollow(this.AutoPlayerJS.currentPathNode).mul(this.weightPathFollow));
+        }
+
+
+
+
         return this.vSteeringForce;
+    },
+    AccumulateForce(currentSteeringForce,addedForce){
+        var currentForceLength = currentSteeringForce.mag();
+        var forceCanUse = this.AutoPlayerJS.MaxForce - currentForceLength;
+        if(forceCanUse <= 0){
+            return currentSteeringForce;
+        }
+        var addedForceLength = addedForce.mag();
+        if(addedForceLength <= forceCanUse){
+            return currentSteeringForce.add(addedForce);
+        }else{
+            var canUsedAddedForce = addedForce.normalize().mul(forceCanUse);
+            return currentSteeringForce.add(canUsedAddedForce);
+        }
     },
     Seek(targetPos){
         var desiredVelocity = (targetPos.sub(this.AutoPlayerJS.node.position)).normalize().mul(this.AutoPlayerJS.MaxSpeed);
@@ -179,6 +212,11 @@ cc.Class({
         var threatRange = 200;
         if(toPursuer.mag() > threatRange){
             return cc.Vec2.ZERO;
+        }
+        if(this.isShowDrawDebugGraphics){
+            this.graphics.strokeColor = cc.Color.YELLOW;
+            this.graphics.circle(0,0, threatRange);
+            this.graphics.stroke();        
         }
         var lookAhead = toPursuer.mag()/(this.AutoPlayerJS.MaxSpeed + pursuer.vVelocity.mag());
         return this.Flee(pursuer.node.position.add(pursuer.vVelocity.mul(lookAhead)));
@@ -245,7 +283,7 @@ cc.Class({
         }
 
         // 绘制 辅助线
-        if(this.isShowDrawDebugGraphics){
+        if(this.isShowDrawDebugGraphics && activeSensor != null){
             this.graphics.strokeColor = cc.Color.GREEN;
             for(var i = 0;i < sensorList.length;i++){
                 this.graphics.moveTo(0, 0);
@@ -326,7 +364,7 @@ cc.Class({
                 break;
             }
         }
-        if(this.isShowDrawDebugGraphics){
+        if(this.isShowDrawDebugGraphics && hitPointToCanvas != null){
             this.graphics.strokeColor = cc.Color.GREEN;
             this.graphics.moveTo(0, 0);
             this.graphics.lineTo(mid0.x, mid0.y);
@@ -441,7 +479,7 @@ cc.Class({
             }
         }
         // 绘制 辅助线
-        if(this.isShowDrawDebugGraphics){
+        if(this.isShowDrawDebugGraphics && isVisual){
             this.graphics.strokeColor = cc.Color.ORANGE;
             for(var i = 0;i < sensorList.length;i++){
                 this.graphics.moveTo(0, 0);

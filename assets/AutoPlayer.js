@@ -131,7 +131,7 @@ cc.Class({
         var angle = this.node.angle*Math.PI/180;
         this.vHeading =  cc.Vec2.UP.rotate(angle);
 
-        this.wrapWinSize();
+        // this.wrapWinSize();
 
     },
 

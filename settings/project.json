@@ -21,6 +21,13 @@
       true,
       false,
       false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false
     ]
   ],
   "design-resolution-height": 640,
@@ -42,7 +49,8 @@
     "default",
     "player",
     "obstacle",
-    "wall"
+    "wall",
+    "UI"
   ],
   "last-module-event-record-time": 1559029152227,
   "simulator-orientation": false,

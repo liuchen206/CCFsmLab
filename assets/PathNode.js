@@ -28,7 +28,7 @@ cc.Class({
         //     }
         // },
         pathCollider:cc.PolygonCollider,
-        pathPointsInCanvas:[],
+        pathPointsInGameWorld:[],
         graphics:cc.Graphics,
         pointIndex:0,
         isPathDoCircle:true,
@@ -37,13 +37,12 @@ cc.Class({
     // LIFE-CYCLE CALLBACKS:
 
     onLoad () {
-        this.graphics = cc.find("Canvas").getComponent(cc.Graphics);
         var pointListInColider = this.pathCollider.points;
         cc.log(" pointListInColider.length", pointListInColider.length);
         for(var i = 0;i < pointListInColider.length;i++){
             var pointInGlobal = this.node.convertToWorldSpaceAR(pointListInColider[i]);
-            var pointInCanvas = cc.find("Canvas").convertToNodeSpaceAR(pointInGlobal);
-            this.pathPointsInCanvas.push(pointInCanvas);
+            var pointInGameWorld = cc.find("Canvas/GameWorld").convertToNodeSpaceAR(pointInGlobal);
+            this.pathPointsInGameWorld.push(pointInGameWorld);
         }
     },
 
@@ -52,36 +51,36 @@ cc.Class({
 
     update (dt) {
         this.graphics.clear();
-        for(var i = 0; i < this.pathPointsInCanvas.length;i++){
+        for(var i = 0; i < this.pathCollider.points.length;i++){
             this.graphics.strokeColor = cc.Color.GREEN;
-            this.graphics.circle(this.pathPointsInCanvas[i].x, this.pathPointsInCanvas[i].y, 5);
+            this.graphics.circle(this.pathCollider.points[i].x, this.pathCollider.points[i].y, 5);
         }
         this.graphics.stroke();
     },
 
     getCurrentPoint(){
-        if(this.pathPointsInCanvas.length > this.pointIndex){
-            return this.pathPointsInCanvas[this.pointIndex];
+        if(this.pathPointsInGameWorld.length > this.pointIndex){
+            return this.pathPointsInGameWorld[this.pointIndex];
         }else{
             return null;
         }
     },
     goNextPoint(){
         this.pointIndex++;
-        if(this.pathPointsInCanvas.length > this.pointIndex){
-            return this.pathPointsInCanvas[this.pointIndex];
+        if(this.pathPointsInGameWorld.length > this.pointIndex){
+            return this.pathPointsInGameWorld[this.pointIndex];
         }else{
             // 意味着路径已经走到头
             if(this.isPathDoCircle){
                 this.pointIndex = 0;
-                return this.pathPointsInCanvas[this.pointIndex];
+                return this.pathPointsInGameWorld[this.pointIndex];
             }else{
                 return null;
             }
         }
     },
     isFinshed(){
-        if(this.pathPointsInCanvas.length - 1 === this.pointIndex && this.isPathDoCircle === false){
+        if(this.pathPointsInGameWorld.length - 1 === this.pointIndex && this.isPathDoCircle === false){
             return true;
         }else{
             return false;

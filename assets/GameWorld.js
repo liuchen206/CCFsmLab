@@ -54,6 +54,10 @@ cc.Class({
         HideEditBox:cc.EditBox,
         PathFollowEditBox:cc.EditBox,
         OffetPursuitEditBox:cc.EditBox,
+        gameWorldNode:cc.Node,
+        obstacleContainer:cc.Node,
+        wallContainer:cc.Node,
+        playerContainer:cc.Node,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -79,11 +83,11 @@ cc.Class({
         // cc.log('getObstacleList ',this.getObstacleList().length);
 
         this.node.on('mousedown', function (event) {
-            var newVec2 = this.node.convertToNodeSpaceAR(new cc.Vec2(event.getLocationX(),event.getLocationY()));
+            var newVec2 = this.gameWorldNode.convertToNodeSpaceAR(new cc.Vec2(event.getLocationX(),event.getLocationY()));
             this.crossHair.position = newVec2;
         }, this);
         this.node.on('touchstart', function (event) {
-            var newVec2 = this.node.convertToNodeSpaceAR(new cc.Vec2(event.getLocationX(),event.getLocationY()));
+            var newVec2 = this.gameWorldNode.convertToNodeSpaceAR(new cc.Vec2(event.getLocationX(),event.getLocationY()));
             this.crossHair.position = newVec2;
         }, this);
     },
@@ -102,7 +106,8 @@ cc.Class({
         this.OffetPursuitEditBox.string = this.globalWeightOffetPursuit.toString();
     },
 
-    // update (dt) {},
+    update (dt) {
+    },
 
     getHidePosition(hunterJS){
         var obstacleList = this.getObstacleList();
@@ -137,7 +142,7 @@ cc.Class({
 
     // 获得所有障碍物
     getObstacleList(){
-        var allNodeInCanvas = this.node.children;
+        var allNodeInCanvas = this.obstacleContainer.children;
         var obstacleList = [];
         for(var i = 0;i < allNodeInCanvas.length;i++){
             if(allNodeInCanvas[i].getComponent('ObStacle') !== null){
@@ -148,7 +153,7 @@ cc.Class({
     },
     // 获得半径内的所有出自己外的 player
     getPlayerList(searchPlayerNodeJS,radio){
-        var allNodeInCanvas = this.node.children;
+        var allNodeInCanvas = this.playerContainer.children;
         var playerList = [];
         for(var i = 0;i < allNodeInCanvas.length;i++){
             if(allNodeInCanvas[i].getComponent('AutoPlayer') !== null){

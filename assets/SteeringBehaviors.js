@@ -310,7 +310,7 @@ cc.Class({
             }
             derectVec = derectVec.normalize().mul(activeSensor['data'].mag());
             // 三类点：1，player坐标系中绘制辅助线的点。2，世界坐标系下的射线检测点。3，射线检测结果转为canvas中的位置坐标点
-            var canvasPos = cc.find("Canvas").convertToNodeSpaceAR(this.graphics.node.convertToWorldSpaceAR(derectVec)); // canvas中的pos
+            var canvasPos = cc.find("Canvas/GameWorld").convertToNodeSpaceAR(this.graphics.node.convertToWorldSpaceAR(derectVec)); // canvas中的pos
 
             steeringForce = this.Seek(canvasPos);
             // cc.log('canvasPos ==',canvasPos.toString());
@@ -349,7 +349,7 @@ cc.Class({
             var fraction = result.fraction;
             if(collider.tag == EnumOfColliderTag.wallCollider){ //仅仅检测墙壁
                 var hitPointToGraphics = this.graphics.node.convertToNodeSpaceAR(point);
-                hitPointToCanvas = cc.find("Canvas").convertToNodeSpaceAR(point);
+                hitPointToCanvas = cc.find("Canvas/GameWorld").convertToNodeSpaceAR(point);
                 hitPointNormal = normal;
                 
                 var normalToGgraphics = this.graphics.node.convertToNodeSpaceAR(normal.mul(100).add(point));
@@ -534,7 +534,7 @@ cc.Class({
         // var offset = new cc.Vec2(0,-100);
         var offset = this.offsetToLeader;
         var pointInGlobal = leader.node.convertToWorldSpaceAR(offset);
-        var pointInCanvas = cc.find("Canvas").convertToNodeSpaceAR(pointInGlobal);
+        var pointInCanvas = cc.find("Canvas/GameWorld").convertToNodeSpaceAR(pointInGlobal);
 
         var toPursuer = pointInCanvas.sub(this.AutoPlayerJS.node.position);
         var lookAhead = toPursuer.mag()/(this.AutoPlayerJS.MaxSpeed + leader.vVelocity.mag());

@@ -41,7 +41,7 @@ cc.Class({
         cc.log(" pointListInColider.length", pointListInColider.length);
         for(var i = 0;i < pointListInColider.length;i++){
             var pointInGlobal = this.node.convertToWorldSpaceAR(pointListInColider[i]);
-            var pointInGameWorld = cc.find("Canvas/GameWorld").convertToNodeSpaceAR(pointInGlobal);
+            var pointInGameWorld = cc.find("Canvas/GameView/GameWorld").convertToNodeSpaceAR(pointInGlobal);
             this.pathPointsInGameWorld.push(pointInGameWorld);
         }
     },

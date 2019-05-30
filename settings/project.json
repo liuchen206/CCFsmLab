@@ -28,6 +28,23 @@
       false,
       false,
       false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
     ]
   ],
   "design-resolution-height": 640,
@@ -50,7 +67,9 @@
     "player",
     "obstacle",
     "wall",
-    "UI"
+    "UI",
+    "bb",
+    "cc"
   ],
   "last-module-event-record-time": 1559029152227,
   "simulator-orientation": false,

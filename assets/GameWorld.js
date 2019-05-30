@@ -81,15 +81,6 @@ cc.Class({
 
         // cc.log('childrenCount',this.node.childrenCount);
         // cc.log('getObstacleList ',this.getObstacleList().length);
-
-        this.node.on('mousedown', function (event) {
-            var newVec2 = this.gameWorldNode.convertToNodeSpaceAR(new cc.Vec2(event.getLocationX(),event.getLocationY()));
-            this.crossHair.position = newVec2;
-        }, this);
-        this.node.on('touchstart', function (event) {
-            var newVec2 = this.gameWorldNode.convertToNodeSpaceAR(new cc.Vec2(event.getLocationX(),event.getLocationY()));
-            this.crossHair.position = newVec2;
-        }, this);
     },
 
     start () {

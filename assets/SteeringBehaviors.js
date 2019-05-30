@@ -76,8 +76,9 @@ cc.Class({
         // cc.log('MapNum：：',MapNum(50,0,100,50,100));
         // cc.log('MapNum：：',MapNum(0,-50,50,0,100));
 
-        noise.seed(Math.random());
-        // cc.log("Math.random(),",Math.random());
+        // noise.seed(Math.random());
+        this.perlinSeed = Math.random()*10000
+        // cc.log("Math.random(),",this.perlinSeed);
     },
 
     update (dt) {
@@ -222,8 +223,8 @@ cc.Class({
         return this.Flee(pursuer.node.position.add(pursuer.vVelocity.mul(lookAhead)));
     },
     Wander(){
-        var berlinX = noise.perlin2(this.elapseTime,this.elapseTime);  
-        var berlinY = noise.perlin2(this.elapseTime+10000,this.elapseTime+10000);  
+        var berlinX = noise.perlin2(this.perlinSeed,this.elapseTime);  
+        var berlinY = noise.perlin2(this.perlinSeed,this.elapseTime*1000);  
         var randomForceX = MapNum(berlinX,-1,1,-this.AutoPlayerJS.MaxSpeed*3,this.AutoPlayerJS.MaxSpeed*3);
         var randomForceY = MapNum(berlinY,-1,1,-this.AutoPlayerJS.MaxSpeed*3,this.AutoPlayerJS.MaxSpeed*3);
         var streeingForce = new cc.Vec2(randomForceX,randomForceY);

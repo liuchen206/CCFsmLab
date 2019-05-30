@@ -58,6 +58,8 @@ cc.Class({
         obstacleContainer:cc.Node,
         wallContainer:cc.Node,
         playerContainer:cc.Node,
+
+        playerCloneNode:cc.Node,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -81,6 +83,15 @@ cc.Class({
 
         // cc.log('childrenCount',this.node.childrenCount);
         // cc.log('getObstacleList ',this.getObstacleList().length);
+
+        // this.pressureTest();
+    },
+    pressureTest(){
+        for(var i = 0;i < 50;i++){
+            var node = cc.instantiate(this.playerCloneNode);
+            node.parent = this.playerContainer;
+            node.setPosition(Math.random()*cc.winSize.width, Math.random()*cc.winSize.width);
+        }
     },
 
     start () {

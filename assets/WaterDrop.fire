@@ -321,7 +321,7 @@
     "_enabled": true,
     "debug": true,
     "inputAllowed": true,
-    "bezierCtrlToCenter": 180,
+    "bezierCtrlToCenter": 150,
     "dropToMix": {
       "__id__": 8
     },

@@ -99,10 +99,21 @@ cc.Class({
         var vec3ToR2 = this.dropToMix.position.sub(this.node.position);
         var vecToR2 = new cc.Vec2(vec3ToR2.x,vec3ToR2.y);
         var r1Point1 = vecToR2.normalize().mul(radius1).rotate(u1+(r1MaxSpread-u1)*v);
-        if(r1Point1 == undefined){
-            cc.log('bug is here');
-        }
         var r1Point2 = vecToR2.normalize().mul(radius1).rotate(-(u1+(r1MaxSpread-u1)*v));
+
+        // var shortestDistanceIndex = 0;
+        // var shortestDistance = 99999;
+        // for(var N = 0; N < this.nodes.length; N++) {
+        //     var currentIndex = this.nodes[N];
+        //     var ctrlVec = new cc.Vec2(currentIndex.x,currentIndex.y);
+        //     var distanveToCtrlPoint = ctrlVec.sub(r1Point1).mag();
+        //     if(shortestDistance > distanveToCtrlPoint){
+        //         shortestDistance = distanveToCtrlPoint;
+        //         shortestDistanceIndex = N;
+        //     }
+        // }
+        // this.nodes[shortestDistanceIndex].x = r1Point1.x;
+        // this.nodes[shortestDistanceIndex].y = r1Point1.y;
 
         if(this.debug){
             this.graphics.strokeColor = cc.Color.RED;

@@ -34,12 +34,12 @@ cc.Class({
         },
         Joystick:cc.Node,
         isManulPlayer:false,
+        isDebug:false,
         // blob数据
         blobContainer:cc.Node,
         quality:3,// 节点密度
         nodes :[], // 节点数组
         radius: 85, // 半径
-        anotherBlobNode: cc.Node, // 准备融合的节点
         targetRotation:0, // 期望的旋转角
         dragForceNodeIndex:-1, // 施加力的节点下标
     },
@@ -55,9 +55,9 @@ cc.Class({
 
     start () {
         // function test 
-        var arr = [1,2,3,4,5];
-        var ele = this.getArrayElementByOffset(arr,0,-1);
-        cc.log('ele',ele);
+        // var arr = [1,2,3,4,5];
+        // var ele = this.getArrayElementByOffset(arr,0,-1);
+        // cc.log('ele',ele);
 
         // var objArr = [
         //     {
@@ -72,14 +72,15 @@ cc.Class({
         // temp.a = 10;
         // cc.log('temp.a,objArr[0].a',temp.a,objArr[0].a);
     },
-
+    onDestroy(){
+        cc.log('this.InstanceID on destory',this.InstanceID);
+    },
     update (dt) {
         this.vStreeingForce = cc.Vec2.ZERO;
         if(this.isManulPlayer){
             this.vStreeingForce = this.JoystickJS.GetForce();
         }else{
             // this.vStreeingForce = this.SteeringBehaviorsJS.Calculate();
-
         }
         this.vStreeingForce = TruncateByVec2Mag(this.MaxForce,this.vStreeingForce);
         // 摩擦力
@@ -107,24 +108,43 @@ cc.Class({
 
         // 当有速度时，设置施力点
         if(this.vVelocity.mag() > 10){
-            if(this.dragForceNodeIndex == -1){
-                var negVelocity = this.vVelocity.neg().normalize().mul(this.radius);
-                var shortestDistance = 9999;
+            if(this.dragForceNodeIndex != -1){
+
+            }else{
+                var negVelocity = this.vVelocity.neg().normalize();
+                var smallestDegree = 180;
                 for(var i = 0;i < this.nodes.length;i++){
                     var nodeData = this.nodes[i];
-                    var distance = nodeData.pos.sub(negVelocity).mag();
-                    if(distance < shortestDistance){
-                        shortestDistance = distance;
+                    var nodeVec = nodeData.pos.normalize();
+                    var temp = nodeVec.dot(negVelocity);
+                    var tempDegree = Math.acos(temp)/Math.PI*180;
+                    if(tempDegree < smallestDegree){
+                        smallestDegree = tempDegree;
                         this.dragForceNodeIndex = i;
                     }
+                    // cc.log('i,tempDegree,',i,tempDegree);
                 }
             }
-            // this.dragForceNodeIndex = 0;
         }else{
             this.dragForceNodeIndex = -1;
         }
+
         this.updateBlob();
-    },
+
+        // 融合检测
+        var allBlobNodeList = this.getAllBlobNodeWithoutSelf(9999); 
+        for(var i= 0;i<allBlobNodeList.length;i++){
+            var anCheckBlobJS = allBlobNodeList[i].getComponent('WaterDropAdvance');
+            var distanceWithTwoNode = anCheckBlobJS.node.position.sub(this.node.position).mag();
+            if(distanceWithTwoNode <= this.radius + anCheckBlobJS.radius){
+                if(this.radius > anCheckBlobJS.radius){
+                    if(anCheckBlobJS.nodes.length > 0){
+                        this.merge(anCheckBlobJS.node);
+                    }
+                }
+            }
+        }
+},
     wrapWinSize(){
         if(this.node.x > cc.winSize.width/2){
             this.node.x = cc.winSize.width/2;
@@ -216,10 +236,12 @@ cc.Class({
         }
     },
     updateBlob(){
-        var currentGraphicsStyle = graphicsStyle[0];
-        var allBlobNodeList = this.getAllBlobNodeWithoutSelf(9999); 
+        var currentGraphicsStyle = graphicsStyle[this.isDebug?1:0];
         this.graphics.clear();
 
+        if(this.nodes.length < 3){
+            return;
+        }
         // 提前设置了绘图的样式
         if(!currentGraphicsStyle.debug){
             this.graphics.strokeColor = currentGraphicsStyle.strokeStyle;
@@ -236,8 +258,7 @@ cc.Class({
         if(this.nodes[this.dragForceNodeIndex]){
             var negVelocity = this.vVelocity.neg().normalize();
             this.targetRotation = Math.atan2(negVelocity.y,negVelocity.x);
-            this.node.angle += (this.targetRotation - this.node.angle)*0.2;
-            // this.node.angle = (this.targetRotation);
+            this.node.angle += (this.targetRotation - this.node.angle)*0.5;
             this.updateNormals();
         }
         // 重新计算节点位置
@@ -264,8 +285,8 @@ cc.Class({
                 var ratio = i == this.dragForceNodeIndex?0.7:0.5;
                 var times = MapNum(this.vVelocity.mag(),0,this.MaxSpeed,0,this.radius*4);
                 var negVelocity = this.vVelocity.neg().normalize().mul(times);
-                newNodePos.x += negVelocity.x*ratio;
-                newNodePos.y += negVelocity.y*ratio;
+                newNodePos.x += (negVelocity.x-newNodePos.x)*ratio;
+                newNodePos.y += (negVelocity.y-newNodePos.y)*ratio;
             }
             nodeData.pos.x += (newNodePos.x - nodeData.pos.x)*0.1;
             nodeData.pos.y += (newNodePos.y - nodeData.pos.y)*0.1;
@@ -298,6 +319,38 @@ cc.Class({
                 this.graphics.fill();
             }
         }
+    },
+    merge(nodeToMerge){
+        this.vVelocity = this.vVelocity.mul(0.5);
+        var nodeTomergeJS = nodeToMerge.getComponent('WaterDropAdvance');
+        this.vVelocity.x += nodeTomergeJS.vVelocity.x*0.5;
+        this.vVelocity.y += nodeTomergeJS.vVelocity.y*0.5;
+        
+        var nestestNodeIndexOnThisNode = null;
+        var nestestdistanceOnThis = 9999;
+        for(var i= 0;i < this.nodes.length;i++){
+            var vectAInWorld = this.node.convertToWorldSpaceAR(this.nodes[i].pos);
+            var vectBInWorld = nodeTomergeJS.node.parent.convertToWorldSpaceAR(nodeTomergeJS.node.position);
+            var tempDistance = vectAInWorld.sub(vectBInWorld).mag();
+            if(tempDistance < nestestdistanceOnThis){
+                nestestdistanceOnThis = tempDistance;
+                nestestNodeIndexOnThisNode = i;
+            }
+        }
+        var nearestDragNode = this.getArrayElementByOffset(this.nodes,nestestNodeIndexOnThisNode,0);
+        nearestDragNode.pos = nearestDragNode.pos.add(nearestDragNode.pos.normalize().mul(nodeTomergeJS.radius*2));
+
+        while(nodeTomergeJS.nodes.length > 0){
+            // this.nodes.push(nodeTomergeJS.nodes.shift());
+            nodeTomergeJS.nodes.shift();
+            // cc.log('nodeTomergeJS.nodes.length',nodeTomergeJS.nodes.length);
+        }
+        this.quality = this.nodes.length;
+        this.radius += nodeTomergeJS.radius/4;
+        // this.dragForceNodeIndex = nodeTomergeJS.dragForceNodeIndex==-1?nodeTomergeJS.dragForceNodeIndex:this.dragForceNodeIndex;
+        this.updateNormals();
+        this.updateJoints();
+        nodeTomergeJS.node.destroy();
     },
     getAllBlobNodeWithoutSelf(radius){
         var allNodeInCanvas = this.blobContainer.children;

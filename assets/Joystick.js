@@ -117,7 +117,7 @@ cc.Class({
       this.dot.setPosition(cc.v2(posX, posY));
 
       // 摇杆尚未超过极限距离
-      this.playerStreeingForce = p.mul(200);
+      this.playerStreeingForce = p.mul(750);
     } else {
       // 控杆永远保持在圈内，并在圈内跟随触摸更新角度
       const x = this._stickPos.x + p.x * this._radius;
@@ -125,7 +125,7 @@ cc.Class({
       this.dot.setPosition(cc.v2(x, y));
 
       // 摇杆超过极限距离
-      this.playerStreeingForce = p.mul(300);
+      this.playerStreeingForce = p.mul(750);
     }
   },
 

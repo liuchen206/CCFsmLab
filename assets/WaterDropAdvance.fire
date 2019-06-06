@@ -79,7 +79,7 @@
     "_level": 0,
     "_components": [
       {
-        "__id__": 21
+        "__id__": 19
       }
     ],
     "_prefab": null,
@@ -348,9 +348,6 @@
     "_children": [
       {
         "__id__": 8
-      },
-      {
-        "__id__": 18
       }
     ],
     "_active": true,
@@ -418,7 +415,9 @@
         "__id__": 17
       }
     ],
-    "_prefab": null,
+    "_prefab": {
+      "__id__": 18
+    },
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
@@ -487,7 +486,7 @@
       "__id__": 10
     },
     "isManulPlayer": true,
-    "isDebug": false,
+    "isDebug": true,
     "blobContainer": {
       "__id__": 7
     },
@@ -496,6 +495,10 @@
     "radius": 80,
     "targetRotation": 0,
     "dragForceNodeIndex": -1,
+    "canntSplitTime": 0,
+    "waterDropPrefab": {
+      "__uuid__": "f0af32e1-a72e-4d7b-a971-db7d987f1c16"
+    },
     "_id": "fdJKduFCRPN6RmTwCk0aO2"
   },
   {
@@ -851,134 +854,18 @@
       "a": 255
     },
     "_miterLimit": 10,
-    "_id": "81tcI0YmVNxLGnJkgrc+YC"
+    "_id": "b2WLuVoBdJM6IoHklmV3J3"
   },
   {
-    "__type__": "cc.Node",
-    "_name": "WaterDropAdvance copy",
-    "_objFlags": 0,
-    "_parent": {
-      "__id__": 7
+    "__type__": "cc.PrefabInfo",
+    "root": {
+      "__id__": 8
     },
-    "_children": [],
-    "_active": true,
-    "_level": 4,
-    "_components": [
-      {
-        "__id__": 19
-      },
-      {
-        "__id__": 20
-      }
-    ],
-    "_prefab": null,
-    "_opacity": 255,
-    "_color": {
-      "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
-      "a": 255
+    "asset": {
+      "__uuid__": "f0af32e1-a72e-4d7b-a971-db7d987f1c16"
     },
-    "_contentSize": {
-      "__type__": "cc.Size",
-      "width": 0,
-      "height": 0
-    },
-    "_anchorPoint": {
-      "__type__": "cc.Vec2",
-      "x": 0.5,
-      "y": 0.5
-    },
-    "_position": {
-      "__type__": "cc.Vec3",
-      "x": 172.77,
-      "y": 401.635,
-      "z": 0
-    },
-    "_scale": {
-      "__type__": "cc.Vec3",
-      "x": 1,
-      "y": 1,
-      "z": 1
-    },
-    "_quat": {
-      "__type__": "cc.Quat",
-      "x": 0,
-      "y": 0,
-      "z": 0,
-      "w": 1
-    },
-    "_skewX": 0,
-    "_skewY": 0,
-    "_is3DNode": false,
-    "groupIndex": 0,
-    "_id": "6dRc6sPV9AbYhvpWbE7jXn"
-  },
-  {
-    "__type__": "15d55NaFT9Ad5n/eS+OzucZ",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 18
-    },
-    "_enabled": true,
-    "vVelocity": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
-    },
-    "vStreeingForce": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
-    },
-    "MaxForce": 750,
-    "MaxSpeed": 250,
-    "FrictionForce": 100,
-    "Joystick": {
-      "__id__": 10
-    },
-    "isManulPlayer": false,
-    "isDebug": false,
-    "blobContainer": {
-      "__id__": 7
-    },
-    "quality": 8,
-    "nodes": [],
-    "radius": 70,
-    "targetRotation": 0,
-    "dragForceNodeIndex": -1,
-    "_id": "d9QfsKsv5AEY3kWLRIcsI0"
-  },
-  {
-    "__type__": "cc.Graphics",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 18
-    },
-    "_enabled": true,
-    "_materials": [],
-    "_lineWidth": 3,
-    "_strokeColor": {
-      "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
-      "a": 255
-    },
-    "_lineJoin": 2,
-    "_lineCap": 0,
-    "_fillColor": {
-      "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
-      "a": 255
-    },
-    "_miterLimit": 8,
-    "_id": "c5FlqN3YdLnbsET/SnEJN8"
+    "fileId": "a99RJJWGxJxK53reQdIbEN",
+    "sync": false
   },
   {
     "__type__": "cc.Canvas",

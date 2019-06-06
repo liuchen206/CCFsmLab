@@ -32,25 +32,56 @@ cc.Class({
             default: 5,
             tooltip: '摩擦系数',
         },
-        Joystick:cc.Node,
+        Joystick:{
+            default:null,
+            type:cc.Node,
+            serializable:true
+        },
         isManulPlayer:false,
         isDebug:false,
         // blob数据
-        blobContainer:cc.Node,
-        quality:3,// 节点密度
-        nodes :[], // 节点数组
-        radius: 85, // 半径
-        targetRotation:0, // 期望的旋转角
-        dragForceNodeIndex:-1, // 施加力的节点下标
+        blobContainer:{
+            default:null,
+            type:cc.Node,
+        },
+        quality:{
+            default:8,// 节点密度
+        },
+        nodes :{
+            default:[], // 节点数组
+        },
+        radius: {
+            default:80, // 半径
+        },
+        targetRotation:{
+            default:0, // 期望的旋转角
+        },
+        dragForceNodeIndex:{
+            default:-1, // 施加力的节点下标
+        },
+        canntSplitTime:{
+            default:0, // 禁止再次分离倒计时
+        },
+        waterDropPrefab:{
+            default:null,
+            type:cc.Prefab,
+        }
     },
 
     // LIFE-CYCLE CALLBACKS:
 
     onLoad () {
-        this.JoystickJS = this.Joystick.getComponent('Joystick');
+        if(this.Joystick){
+            this.JoystickJS = this.Joystick.getComponent('Joystick');
+        }
         this.graphics = this.getComponent(cc.Graphics);
         this.InstanceID = PlayerInstanceIdManager.GetAnNewID();
-        this.initNodes();
+
+        // this.quality = 16;
+
+        if(this.nodes.length <= 0){
+            this.initNodes();
+        }
     },
 
     start () {
@@ -77,7 +108,7 @@ cc.Class({
     },
     update (dt) {
         this.vStreeingForce = cc.Vec2.ZERO;
-        if(this.isManulPlayer){
+        if(this.isManulPlayer && this.JoystickJS!=null){
             this.vStreeingForce = this.JoystickJS.GetForce();
         }else{
             // this.vStreeingForce = this.SteeringBehaviorsJS.Calculate();
@@ -143,6 +174,15 @@ cc.Class({
                     }
                 }
             }
+        }
+        // 分离检测
+        if(this.vVelocity.mag() > 100 && this.canntSplitTime <= 0){
+            this.split();
+        }
+        if(this.canntSplitTime > 0){
+            this.canntSplitTime -= dt;
+        }else{
+            this.canntSplitTime = 0;
         }
 },
     wrapWinSize(){
@@ -340,19 +380,68 @@ cc.Class({
         var nearestDragNode = this.getArrayElementByOffset(this.nodes,nestestNodeIndexOnThisNode,0);
         nearestDragNode.pos = nearestDragNode.pos.add(nearestDragNode.pos.normalize().mul(nodeTomergeJS.radius*2));
 
-        while(nodeTomergeJS.nodes.length > 0){
+        // while(nodeTomergeJS.nodes.length > 0){
             // this.nodes.push(nodeTomergeJS.nodes.shift());
-            nodeTomergeJS.nodes.shift();
+            // nodeTomergeJS.nodes.shift();
             // cc.log('nodeTomergeJS.nodes.length',nodeTomergeJS.nodes.length);
-        }
-        this.quality = this.nodes.length;
+        // }
+        // this.quality = this.nodes.length;
         this.radius += nodeTomergeJS.radius/4;
         // this.dragForceNodeIndex = nodeTomergeJS.dragForceNodeIndex==-1?nodeTomergeJS.dragForceNodeIndex:this.dragForceNodeIndex;
         this.updateNormals();
         this.updateJoints();
         nodeTomergeJS.node.destroy();
     },
+    split(){
+        var leftLeftNode = this.getArrayElementByOffset(this.nodes,0,-2);
+        var midNode = this.getArrayElementByOffset(this.nodes,0,0);
+        var rightrightNode = this.getArrayElementByOffset(this.nodes,0,2);
+        this.getArrayElementByOffset(this.nodes,0,0).pos = midNode.pos.mul(0.1);
+        this.getArrayElementByOffset(this.nodes,0,-1).pos = leftLeftNode.pos.mul(0.5);
+        this.getArrayElementByOffset(this.nodes,0,1).pos = rightrightNode.pos.mul(0.5);
+        this.radius = this.radius*0.5;
+        this.dragForceNodeIndex = -1;
+        this.updateJoints();
+        this.updateNormals();
+        this.canntSplitTime = 5;
+
+
+
+        var newWaterDropNode = cc.instantiate(this.waterDropPrefab);
+        var newWaterDropNodeJS = newWaterDropNode.getComponent('WaterDropAdvance');
+        newWaterDropNodeJS.radius = this.radius;
+        newWaterDropNodeJS.canntSplitTime = 5;
+        newWaterDropNodeJS.isManulPlayer = false;
+        newWaterDropNodeJS.dragForceNodeIndex = -1;
+
+        newWaterDropNodeJS.nodes = [];
+        for(var i = 0;i<this.nodes.length;i++){
+            var node = {
+                normal: cc.Vec2.ZERO,
+                normalTarget: cc.Vec2.ZERO,
+                ghost: cc.Vec2.ZERO,
+                pos: new cc.Vec2(this.nodes[i].pos.x,this.nodes[i].pos.y),
+                joints:[],
+                angle:0,
+            }
+            newWaterDropNodeJS.nodes.push(node);
+        }
+        newWaterDropNodeJS.nodes[3].pos = newWaterDropNodeJS.nodes[3].pos.mul(0.5);
+        newWaterDropNodeJS.nodes[4].pos = newWaterDropNodeJS.nodes[4].pos.mul(0.1);
+        newWaterDropNodeJS.nodes[5].pos = newWaterDropNodeJS.nodes[5].pos.mul(0.5);
+        newWaterDropNodeJS.updateJoints();
+        newWaterDropNodeJS.updateNormals();
+
+        newWaterDropNode.parent = this.node.parent;
+        newWaterDropNode.position = this.node.position
+
+
+
+    },
     getAllBlobNodeWithoutSelf(radius){
+        if(this.blobContainer == null){
+            return [];
+        }
         var allNodeInCanvas = this.blobContainer.children;
         var playerList = [];
         for(var i = 0;i < allNodeInCanvas.length;i++){

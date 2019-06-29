@@ -35,6 +35,16 @@
       false,
       false,
       false,
+      false,
+      true
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
       false
     ],
     [
@@ -44,6 +54,19 @@
       false,
       false,
       false,
+      false,
+      false,
+      true
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
       false
     ]
   ],
@@ -68,16 +91,18 @@
     "obstacle",
     "wall",
     "UI",
-    "bb",
-    "cc"
+    "Drag",
+    "DropCapture",
+    "Bullet",
+    "enemy"
   ],
-  "last-module-event-record-time": 1559637971419,
+  "last-module-event-record-time": 1560304185920,
   "simulator-orientation": false,
   "simulator-resolution": {
     "height": 640,
     "width": 960
   },
-  "start-scene": "current",
   "use-customize-simulator": true,
-  "use-project-simulator-setting": false
+  "use-project-simulator-setting": false,
+  "start-scene": "current"
 }
